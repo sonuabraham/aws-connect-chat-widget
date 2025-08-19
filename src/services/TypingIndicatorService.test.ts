@@ -33,7 +33,7 @@ describe('TypingIndicatorService', () => {
       typingService.on('onTypingStop', onTypingStop);
 
       typingService.handleTypingIndicator('agent-1');
-      
+
       // Advance time past timeout
       vi.advanceTimersByTime(3000);
 
@@ -48,15 +48,15 @@ describe('TypingIndicatorService', () => {
       typingService.on('onTypingStop', onTypingStop);
 
       typingService.handleTypingIndicator('agent-1');
-      
+
       // Send another indicator before timeout
       vi.advanceTimersByTime(1500);
       typingService.handleTypingIndicator('agent-1');
-      
+
       // Advance to original timeout
       vi.advanceTimersByTime(1500);
       expect(onTypingStop).not.toHaveBeenCalled();
-      
+
       // Advance to extended timeout
       vi.advanceTimersByTime(1500);
       expect(onTypingStop).toHaveBeenCalledWith('agent-1');
@@ -120,7 +120,7 @@ describe('TypingIndicatorService', () => {
     it('should stop individual participants', () => {
       typingService.handleTypingIndicator('agent-1');
       typingService.handleTypingIndicator('agent-2');
-      
+
       typingService.stopTyping('agent-1');
 
       expect(typingService.isParticipantTyping('agent-1')).toBe(false);
@@ -134,7 +134,7 @@ describe('TypingIndicatorService', () => {
 
       typingService.handleTypingIndicator('agent-1');
       typingService.handleTypingIndicator('agent-2');
-      
+
       typingService.clearAll();
 
       expect(onTypingStop).toHaveBeenCalledTimes(2);
@@ -175,10 +175,10 @@ describe('TypingIndicatorService', () => {
       typingService.setTypingTimeout(5000);
 
       typingService.handleTypingIndicator('agent-1');
-      
+
       vi.advanceTimersByTime(3000);
       expect(onTypingStop).not.toHaveBeenCalled();
-      
+
       vi.advanceTimersByTime(2000);
       expect(onTypingStop).toHaveBeenCalled();
     });
@@ -189,10 +189,10 @@ describe('TypingIndicatorService', () => {
       typingService.setUserTypingDelay(2000);
 
       typingService.handleUserTyping();
-      
+
       vi.advanceTimersByTime(1000);
       expect(onSendTypingIndicator).not.toHaveBeenCalled();
-      
+
       vi.advanceTimersByTime(1000);
       expect(onSendTypingIndicator).toHaveBeenCalled();
     });
@@ -217,12 +217,12 @@ describe('TypingIndicatorService', () => {
 
       typingService.handleTypingIndicator('agent-1');
       typingService.handleUserTyping();
-      
+
       typingService.cleanup();
 
       expect(onTypingStop).toHaveBeenCalledWith('agent-1');
       expect(typingService.getTypingParticipants()).toHaveLength(0);
-      
+
       vi.advanceTimersByTime(1000);
       // Should not trigger any events after cleanup
     });

@@ -75,10 +75,10 @@ describe('Widget Lifecycle Management', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    
+
     // Import the widget module
     WidgetModule = await import('./widget-simple');
-    
+
     // Create a widget instance
     widgetInstance = WidgetModule.initializeWidget({
       aws: {
@@ -128,7 +128,7 @@ describe('Widget Lifecycle Management', () => {
   describe('Widget Mounting', () => {
     it('should mount widget successfully', () => {
       widgetInstance.mount();
-      
+
       expect(mockDocument.createElement).toHaveBeenCalledWith('div');
       expect(mockCreateRoot).toHaveBeenCalled();
       expect(mockRoot.render).toHaveBeenCalled();
@@ -137,16 +137,16 @@ describe('Widget Lifecycle Management', () => {
     it('should mount to specific container', () => {
       const containerId = 'custom-container';
       mockDocument.getElementById.mockReturnValue(mockElement);
-      
+
       widgetInstance.mount(containerId);
-      
+
       expect(mockDocument.getElementById).toHaveBeenCalledWith(containerId);
       expect(mockCreateRoot).toHaveBeenCalledWith(mockElement);
     });
 
     it('should throw error for non-existent container', () => {
       mockDocument.getElementById.mockReturnValue(null);
-      
+
       expect(() => {
         widgetInstance.mount('non-existent');
       }).toThrow('Container element with id "non-existent" not found');
@@ -154,7 +154,7 @@ describe('Widget Lifecycle Management', () => {
 
     it('should prevent mounting destroyed widget', () => {
       widgetInstance.destroy();
-      
+
       expect(() => {
         widgetInstance.mount();
       }).toThrow('Cannot mount destroyed widget instance');
@@ -168,42 +168,44 @@ describe('Widget Lifecycle Management', () => {
 
     it('should unmount widget properly', () => {
       widgetInstance.unmount();
-      
+
       expect(mockRoot.unmount).toHaveBeenCalled();
       expect(mockElement.remove).toHaveBeenCalled();
     });
 
     it('should destroy widget completely', () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       widgetInstance.destroy();
-      
+
       expect(widgetInstance.isDestroyed()).toBe(true);
       expect(mockRoot.unmount).toHaveBeenCalled();
       expect(mockWindow.removeEventListener).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith('🧹 Destroying widget instance...');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '🧹 Destroying widget instance...'
+      );
       expect(consoleSpy).toHaveBeenCalledWith('✅ Widget instance destroyed');
-      
+
       consoleSpy.mockRestore();
     });
 
     it('should prevent multiple destroy calls', () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       widgetInstance.destroy();
       widgetInstance.destroy(); // Second call should be ignored
-      
+
       expect(consoleSpy).toHaveBeenCalledTimes(2); // Only first destroy should log
-      
+
       consoleSpy.mockRestore();
     });
 
     it('should cleanup timers', () => {
       // Simulate some timers being created
       widgetInstance.mount();
-      
+
       widgetInstance.destroy();
-      
+
       expect(global.clearInterval).toHaveBeenCalled();
       expect(global.clearTimeout).toHaveBeenCalled();
     });
@@ -218,18 +220,20 @@ describe('Widget Lifecycle Management', () => {
           },
         },
       };
-      
+
       widgetInstance.updateConfig(newConfig);
-      
+
       const state = widgetInstance.getState();
       expect(state.config.ui.theme.primaryColor).toBe('#ff0000');
     });
 
     it('should prevent config update on destroyed widget', () => {
       widgetInstance.destroy();
-      
+
       expect(() => {
-        widgetInstance.updateConfig({ ui: { theme: { primaryColor: '#ff0000' } } });
+        widgetInstance.updateConfig({
+          ui: { theme: { primaryColor: '#ff0000' } },
+        });
       }).toThrow('Cannot update config of destroyed widget instance');
     });
   });
@@ -237,9 +241,9 @@ describe('Widget Lifecycle Management', () => {
   describe('State Management', () => {
     it('should return correct state', () => {
       widgetInstance.mount();
-      
+
       const state = widgetInstance.getState();
-      
+
       expect(state).toEqual({
         mounted: true,
         destroyed: false,
@@ -249,7 +253,7 @@ describe('Widget Lifecycle Management', () => {
 
     it('should return destroyed state', () => {
       widgetInstance.destroy();
-      
+
       expect(widgetInstance.isDestroyed()).toBe(true);
     });
   });
@@ -257,39 +261,38 @@ describe('Widget Lifecycle Management', () => {
   describe('Memory Leak Prevention', () => {
     it('should track event listeners', () => {
       widgetInstance.mount();
-      
+
       // Event listeners should be tracked for cleanup
       expect(mockWindow.addEventListener).toHaveBeenCalled();
     });
 
     it('should start memory monitoring', () => {
       const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
-      
+
       widgetInstance.mount();
-      
+
       // Should schedule memory leak check
-      expect(setTimeoutSpy).toHaveBeenCalledWith(
-        expect.any(Function),
-        30000
-      );
+      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 30000);
     });
   });
 
   describe('Error Handling', () => {
     it('should handle cleanup errors gracefully', () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
+
       // Mock an error during cleanup
       mockRoot.unmount.mockImplementation(() => {
         throw new Error('Cleanup error');
       });
-      
+
       widgetInstance.mount();
       widgetInstance.destroy();
-      
+
       // Should still mark as destroyed despite errors
       expect(widgetInstance.isDestroyed()).toBe(true);
-      
+
       consoleWarnSpy.mockRestore();
     });
   });
@@ -307,9 +310,11 @@ describe('Global Widget API', () => {
 
   it('should expose global API', async () => {
     await import('./widget-simple');
-    
+
     expect((global as any).window.AWSConnectChatWidget).toBeDefined();
-    expect((global as any).window.AWSConnectChatWidget.init).toBeInstanceOf(Function);
+    expect((global as any).window.AWSConnectChatWidget.init).toBeInstanceOf(
+      Function
+    );
     expect((global as any).window.AWSConnectChatWidget.version).toBe('1.0.0');
   });
 });

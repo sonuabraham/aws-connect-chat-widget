@@ -43,7 +43,7 @@ export class MessageQueue {
    */
   enqueue(content: string, maxRetries = this.defaultMaxRetries): string {
     const messageId = this.generateMessageId();
-    
+
     const queuedMessage: QueuedMessage = {
       id: messageId,
       content,
@@ -57,7 +57,7 @@ export class MessageQueue {
       const removedMessage = this.queue.shift();
       if (removedMessage) {
         this.events.onMessageFailed?.(
-          removedMessage.id, 
+          removedMessage.id,
           new Error('Message dropped due to queue size limit')
         );
       }
@@ -126,7 +126,7 @@ export class MessageQueue {
    */
   stopProcessing(): void {
     this.isProcessing = false;
-    
+
     if (this.processingInterval) {
       clearInterval(this.processingInterval);
       this.processingInterval = null;
@@ -136,7 +136,9 @@ export class MessageQueue {
   /**
    * Process a single batch of messages
    */
-  async processQueue(sendFunction: (content: string) => Promise<void>): Promise<void> {
+  async processQueue(
+    sendFunction: (content: string) => Promise<void>
+  ): Promise<void> {
     if (this.queue.length === 0) {
       this.events.onQueueEmpty?.();
       return;
@@ -148,30 +150,33 @@ export class MessageQueue {
 
     try {
       await sendFunction(message.content);
-      
+
       // Message sent successfully, remove from queue
       this.dequeue(message.id);
       this.events.onMessageSent?.(message.id);
-      
+
       if (this.queue.length === 0) {
         this.events.onQueueEmpty?.();
       }
     } catch (error) {
       // Message failed, increment retry count
       message.retryCount++;
-      
+
       if (message.retryCount >= message.maxRetries) {
         // Max retries reached, remove from queue
         this.dequeue(message.id);
         this.events.onMessageFailed?.(
-          message.id, 
+          message.id,
           error instanceof Error ? error : new Error('Unknown error')
         );
       } else {
         // Schedule retry with exponential backoff
-        setTimeout(() => {
-          // Message will be retried in next processing cycle
-        }, this.retryDelay * Math.pow(2, message.retryCount - 1));
+        setTimeout(
+          () => {
+            // Message will be retried in next processing cycle
+          },
+          this.retryDelay * Math.pow(2, message.retryCount - 1)
+        );
       }
     }
   }
@@ -179,7 +184,10 @@ export class MessageQueue {
   /**
    * Set event handlers
    */
-  on<K extends keyof MessageQueueEvents>(event: K, handler: MessageQueueEvents[K]): void {
+  on<K extends keyof MessageQueueEvents>(
+    event: K,
+    handler: MessageQueueEvents[K]
+  ): void {
     this.events[event] = handler;
   }
 
@@ -226,8 +234,10 @@ export class MessageQueue {
   } {
     const pending = this.getPendingMessages();
     const failed = this.getFailedMessages();
-    const oldestMessage = this.queue.length > 0 ? 
-      Math.min(...this.queue.map(msg => msg.timestamp.getTime())) : undefined;
+    const oldestMessage =
+      this.queue.length > 0
+        ? Math.min(...this.queue.map(msg => msg.timestamp.getTime()))
+        : undefined;
 
     return {
       total: this.queue.length,

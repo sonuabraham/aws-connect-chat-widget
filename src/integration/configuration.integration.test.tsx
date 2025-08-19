@@ -94,7 +94,9 @@ describe('Configuration Integration Tests', () => {
       await user.click(screen.getAllByText('Theme & Appearance')[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Theme & Appearance Settings')).toBeInTheDocument();
+        expect(
+          screen.getByText('Theme & Appearance Settings')
+        ).toBeInTheDocument();
       });
 
       // Step 4: Update theme configuration
@@ -115,7 +117,10 @@ describe('Configuration Integration Tests', () => {
       // Step 6: Update message configuration
       const welcomeMessageInput = screen.getByLabelText('Welcome Message *');
       await user.clear(welcomeMessageInput);
-      await user.type(welcomeMessageInput, 'Hello! Welcome to our support chat.');
+      await user.type(
+        welcomeMessageInput,
+        'Hello! Welcome to our support chat.'
+      );
 
       // Step 7: Switch to Features tab
       await user.click(screen.getAllByText('Features')[0]);
@@ -125,10 +130,14 @@ describe('Configuration Integration Tests', () => {
       });
 
       // Step 8: Toggle feature settings
-      const fileUploadToggle = screen.getByRole('checkbox', { name: /File Upload/ });
+      const fileUploadToggle = screen.getByRole('checkbox', {
+        name: /File Upload/,
+      });
       await user.click(fileUploadToggle);
 
-      const chatRatingsToggle = screen.getByRole('checkbox', { name: /Chat Ratings/ });
+      const chatRatingsToggle = screen.getByRole('checkbox', {
+        name: /Chat Ratings/,
+      });
       await user.click(chatRatingsToggle);
 
       // Step 9: Save configuration
@@ -140,7 +149,7 @@ describe('Configuration Integration Tests', () => {
 
     it('should handle validation errors across all tabs', async () => {
       const user = userEvent.setup();
-      
+
       // Mock validation to return errors
       const { validateConfiguration } = require('../utils/validation');
       validateConfiguration.mockReturnValue({
@@ -165,12 +174,15 @@ describe('Configuration Integration Tests', () => {
       });
 
       // Error indicators should appear on tabs
-      const tabs = screen.getAllByRole('button').filter(btn => 
-        btn.textContent?.includes('AWS Connect') ||
-        btn.textContent?.includes('Theme & Appearance') ||
-        btn.textContent?.includes('Messages') ||
-        btn.textContent?.includes('Features')
-      );
+      const tabs = screen
+        .getAllByRole('button')
+        .filter(
+          btn =>
+            btn.textContent?.includes('AWS Connect') ||
+            btn.textContent?.includes('Theme & Appearance') ||
+            btn.textContent?.includes('Messages') ||
+            btn.textContent?.includes('Features')
+        );
 
       // At least some tabs should have error indicators
       expect(tabs.length).toBeGreaterThan(0);
@@ -195,7 +207,9 @@ describe('Configuration Integration Tests', () => {
       await user.click(screen.getAllByText('Theme & Appearance')[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Theme & Appearance Settings')).toBeInTheDocument();
+        expect(
+          screen.getByText('Theme & Appearance Settings')
+        ).toBeInTheDocument();
       });
 
       // Change primary color
@@ -244,7 +258,9 @@ describe('Configuration Integration Tests', () => {
       await user.click(screen.getAllByText('Theme & Appearance')[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Theme & Appearance Settings')).toBeInTheDocument();
+        expect(
+          screen.getByText('Theme & Appearance Settings')
+        ).toBeInTheDocument();
       });
 
       // Look for preview elements
@@ -281,16 +297,24 @@ describe('Configuration Integration Tests', () => {
       });
 
       // Enable file upload (performance-impacting feature)
-      const fileUploadToggle = screen.getByRole('checkbox', { name: /File Upload/ });
+      const fileUploadToggle = screen.getByRole('checkbox', {
+        name: /File Upload/,
+      });
       await user.click(fileUploadToggle);
 
       // Should show performance warning
       expect(screen.getByText(/May impact performance/)).toBeInTheDocument();
 
       // Enable multiple features
-      const emojiToggle = screen.getByRole('checkbox', { name: /Emoji Picker/ });
-      const ratingsToggle = screen.getByRole('checkbox', { name: /Chat Ratings/ });
-      const transcriptToggle = screen.getByRole('checkbox', { name: /Chat Transcript/ });
+      const emojiToggle = screen.getByRole('checkbox', {
+        name: /Emoji Picker/,
+      });
+      const ratingsToggle = screen.getByRole('checkbox', {
+        name: /Chat Ratings/,
+      });
+      const transcriptToggle = screen.getByRole('checkbox', {
+        name: /Chat Transcript/,
+      });
 
       await user.click(emojiToggle);
       await user.click(ratingsToggle);
@@ -328,10 +352,18 @@ describe('Configuration Integration Tests', () => {
       });
 
       // Verify feature descriptions are shown
-      expect(screen.getByText('Allow visitors to upload files during chat')).toBeInTheDocument();
-      expect(screen.getByText('Enable emoji picker in message input')).toBeInTheDocument();
-      expect(screen.getByText('Allow visitors to rate their chat experience')).toBeInTheDocument();
-      expect(screen.getByText('Provide chat transcript download option')).toBeInTheDocument();
+      expect(
+        screen.getByText('Allow visitors to upload files during chat')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Enable emoji picker in message input')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Allow visitors to rate their chat experience')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Provide chat transcript download option')
+      ).toBeInTheDocument();
     });
   });
 
@@ -356,7 +388,9 @@ describe('Configuration Integration Tests', () => {
       await user.click(screen.getAllByText('Theme & Appearance')[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Theme & Appearance Settings')).toBeInTheDocument();
+        expect(
+          screen.getByText('Theme & Appearance Settings')
+        ).toBeInTheDocument();
       });
 
       // Make changes in theme tab
@@ -372,14 +406,18 @@ describe('Configuration Integration Tests', () => {
       });
 
       // Verify previous changes are maintained
-      const instanceIdInputAgain = screen.getByLabelText('Connect Instance ID *');
+      const instanceIdInputAgain = screen.getByLabelText(
+        'Connect Instance ID *'
+      );
       expect(instanceIdInputAgain).toHaveValue('modified-instance-id');
 
       // Switch back to theme tab
       await user.click(screen.getAllByText('Theme & Appearance')[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Theme & Appearance Settings')).toBeInTheDocument();
+        expect(
+          screen.getByText('Theme & Appearance Settings')
+        ).toBeInTheDocument();
       });
 
       // Verify theme changes are maintained
@@ -391,7 +429,7 @@ describe('Configuration Integration Tests', () => {
   describe('Error Recovery', () => {
     it('should recover from validation errors when fixed', async () => {
       const user = userEvent.setup();
-      
+
       // Start with validation errors
       const { validateConfiguration } = require('../utils/validation');
       validateConfiguration.mockReturnValue({
@@ -409,7 +447,9 @@ describe('Configuration Integration Tests', () => {
 
       // Should show error
       await waitFor(() => {
-        expect(screen.getByText(/Invalid instance ID format/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Invalid instance ID format/)
+        ).toBeInTheDocument();
       });
 
       // Fix the error
@@ -427,7 +467,9 @@ describe('Configuration Integration Tests', () => {
       await user.click(screen.getByText('Save Configuration'));
 
       // Should succeed without errors
-      expect(screen.queryByText(/Invalid instance ID format/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Invalid instance ID format/)
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -452,7 +494,9 @@ describe('Configuration Integration Tests', () => {
       await user.click(themeTab);
 
       await waitFor(() => {
-        expect(screen.getByText('Theme & Appearance Settings')).toBeInTheDocument();
+        expect(
+          screen.getByText('Theme & Appearance Settings')
+        ).toBeInTheDocument();
       });
 
       // All form inputs should have proper labels

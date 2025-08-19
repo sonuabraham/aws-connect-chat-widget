@@ -31,30 +31,30 @@ export interface UseWidgetReturn {
   isMinimized: boolean;
   widgetState: WidgetState;
   position: WidgetPosition;
-  
+
   // Visitor management
   visitorInfo: VisitorInfo | null;
   hasVisitorInfo: boolean;
-  
+
   // Widget actions
   openWidget: () => void;
   closeWidget: () => void;
   minimizeWidget: () => void;
   toggleWidget: () => void;
-  
+
   // Visitor actions
   setVisitorInfo: (info: Omit<VisitorInfo, 'sessionId'>) => void;
   updateVisitorInfo: (updates: Partial<VisitorInfo>) => void;
   clearVisitorInfo: () => void;
-  
+
   // Configuration
   updatePosition: (position: Partial<WidgetPosition>) => void;
   updatePreferences: (preferences: Partial<WidgetPreferences>) => void;
-  
+
   // Session management
   sessionId: string | null;
   generateNewSession: () => string;
-  
+
   // Persistence
   saveState: () => void;
   restoreState: () => void;
@@ -83,14 +83,17 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [widgetState, setWidgetState] = useState<WidgetState>('closed');
-  const [position, setPosition] = useState<WidgetPosition>(defaultPreferences.position);
+  const [position, setPosition] = useState<WidgetPosition>(
+    defaultPreferences.position
+  );
   const [visitorInfo, setVisitorInfoState] = useState<VisitorInfo | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [preferences, setPreferences] = useState<WidgetPreferences>(defaultPreferences);
-  
+  const [preferences, setPreferences] =
+    useState<WidgetPreferences>(defaultPreferences);
+
   // Track if visitor has provided required information
   const hasVisitorInfo = Boolean(visitorInfo?.name);
-  
+
   // Use ref to track initialization
   const initializedRef = useRef(false);
 
@@ -102,7 +105,7 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
     setIsOpen(true);
     setIsMinimized(false);
     setWidgetState('initializing');
-    
+
     // Save state
     const newPreferences = { ...preferences, minimized: false };
     setPreferences(newPreferences);
@@ -117,7 +120,7 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
     setIsOpen(false);
     setIsMinimized(false);
     setWidgetState('closed');
-    
+
     // Save state
     const newPreferences = { ...preferences, minimized: false };
     setPreferences(newPreferences);
@@ -131,7 +134,7 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
   const minimizeWidget = useCallback(() => {
     setIsMinimized(true);
     setIsOpen(false);
-    
+
     // Save state
     const newPreferences = { ...preferences, minimized: true };
     setPreferences(newPreferences);
@@ -153,36 +156,42 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
    * Set visitor information
    * Requirement 2.1: Collect and manage visitor information
    */
-  const setVisitorInfo = useCallback((info: Omit<VisitorInfo, 'sessionId'>) => {
-    // Generate session ID if not exists
-    let currentSessionId = sessionId;
-    if (!currentSessionId) {
-      currentSessionId = ChatStorage.generateSessionId();
-      setSessionId(currentSessionId);
-    }
+  const setVisitorInfo = useCallback(
+    (info: Omit<VisitorInfo, 'sessionId'>) => {
+      // Generate session ID if not exists
+      let currentSessionId = sessionId;
+      if (!currentSessionId) {
+        currentSessionId = ChatStorage.generateSessionId();
+        setSessionId(currentSessionId);
+      }
 
-    const fullVisitorInfo: VisitorInfo = {
-      ...info,
-      sessionId: currentSessionId,
-    };
+      const fullVisitorInfo: VisitorInfo = {
+        ...info,
+        sessionId: currentSessionId,
+      };
 
-    setVisitorInfoState(fullVisitorInfo);
-    ChatStorage.saveVisitorInfo(fullVisitorInfo);
-  }, [sessionId]);
+      setVisitorInfoState(fullVisitorInfo);
+      ChatStorage.saveVisitorInfo(fullVisitorInfo);
+    },
+    [sessionId]
+  );
 
   /**
    * Update visitor information
    * Requirement 1.3: Update visitor preferences and information
    */
-  const updateVisitorInfo = useCallback((updates: Partial<VisitorInfo>) => {
-    if (!visitorInfo) {
-      return;
-    }
+  const updateVisitorInfo = useCallback(
+    (updates: Partial<VisitorInfo>) => {
+      if (!visitorInfo) {
+        return;
+      }
 
-    const updatedInfo = { ...visitorInfo, ...updates };
-    setVisitorInfoState(updatedInfo);
-    ChatStorage.saveVisitorInfo(updatedInfo);
-  }, [visitorInfo]);
+      const updatedInfo = { ...visitorInfo, ...updates };
+      setVisitorInfoState(updatedInfo);
+      ChatStorage.saveVisitorInfo(updatedInfo);
+    },
+    [visitorInfo]
+  );
 
   /**
    * Clear visitor information
@@ -196,36 +205,42 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
    * Update widget position
    * Requirement 6.1: Customizable positioning
    */
-  const updatePosition = useCallback((newPosition: Partial<WidgetPosition>) => {
-    const updatedPosition = { ...position, ...newPosition };
-    setPosition(updatedPosition);
-    
-    const newPreferences = { ...preferences, position: updatedPosition };
-    setPreferences(newPreferences);
-    savePreferences(newPreferences);
-  }, [position, preferences]);
+  const updatePosition = useCallback(
+    (newPosition: Partial<WidgetPosition>) => {
+      const updatedPosition = { ...position, ...newPosition };
+      setPosition(updatedPosition);
+
+      const newPreferences = { ...preferences, position: updatedPosition };
+      setPreferences(newPreferences);
+      savePreferences(newPreferences);
+    },
+    [position, preferences]
+  );
 
   /**
    * Update widget preferences
    */
-  const updatePreferences = useCallback((newPreferences: Partial<WidgetPreferences>) => {
-    const updatedPreferences = { ...preferences, ...newPreferences };
-    setPreferences(updatedPreferences);
-    savePreferences(updatedPreferences);
-    
-    // Update position if it changed
-    if (newPreferences.position) {
-      setPosition(newPreferences.position);
-    }
-    
-    // Update minimized state if it changed
-    if (newPreferences.minimized !== undefined) {
-      setIsMinimized(newPreferences.minimized);
-      if (newPreferences.minimized) {
-        setIsOpen(false);
+  const updatePreferences = useCallback(
+    (newPreferences: Partial<WidgetPreferences>) => {
+      const updatedPreferences = { ...preferences, ...newPreferences };
+      setPreferences(updatedPreferences);
+      savePreferences(updatedPreferences);
+
+      // Update position if it changed
+      if (newPreferences.position) {
+        setPosition(newPreferences.position);
       }
-    }
-  }, [preferences]);
+
+      // Update minimized state if it changed
+      if (newPreferences.minimized !== undefined) {
+        setIsMinimized(newPreferences.minimized);
+        if (newPreferences.minimized) {
+          setIsOpen(false);
+        }
+      }
+    },
+    [preferences]
+  );
 
   /**
    * Generate new session ID
@@ -234,14 +249,14 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
   const generateNewSession = useCallback((): string => {
     const newSessionId = ChatStorage.generateSessionId();
     setSessionId(newSessionId);
-    
+
     // Update visitor info with new session ID if exists
     if (visitorInfo) {
       const updatedVisitor = { ...visitorInfo, sessionId: newSessionId };
       setVisitorInfoState(updatedVisitor);
       ChatStorage.saveVisitorInfo(updatedVisitor);
     }
-    
+
     return newSessionId;
   }, [visitorInfo]);
 
@@ -266,7 +281,7 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
       setPreferences(savedPreferences);
       setPosition(savedPreferences.position);
       setIsMinimized(savedPreferences.minimized);
-      
+
       // If was minimized, don't open but keep session
       if (savedPreferences.minimized) {
         setIsOpen(false);
@@ -302,7 +317,7 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
   const clearAllData = useCallback(() => {
     ChatStorage.clearAll();
     clearPreferences();
-    
+
     setVisitorInfoState(null);
     setSessionId(null);
     setPreferences(defaultPreferences);
@@ -346,7 +361,7 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
@@ -367,30 +382,30 @@ export const useWidget = (config?: WidgetConfig): UseWidgetReturn => {
     isMinimized,
     widgetState,
     position,
-    
+
     // Visitor management
     visitorInfo,
     hasVisitorInfo,
-    
+
     // Widget actions
     openWidget,
     closeWidget,
     minimizeWidget,
     toggleWidget,
-    
+
     // Visitor actions
     setVisitorInfo,
     updateVisitorInfo,
     clearVisitorInfo,
-    
+
     // Configuration
     updatePosition,
     updatePreferences,
-    
+
     // Session management
     sessionId,
     generateNewSession,
-    
+
     // Persistence
     saveState,
     restoreState,

@@ -5,21 +5,21 @@
  */
 
 import React, { useState } from 'react';
-import { 
-  ThemeProvider, 
-  useTheme, 
-  useResponsive, 
-  useHighContrast, 
-  useReducedMotion 
+import {
+  ThemeProvider,
+  useTheme,
+  useResponsive,
+  useHighContrast,
+  useReducedMotion,
 } from '../components/ThemeProvider';
-import { 
-  useStyles, 
-  useVariants, 
-  mergeClassNames, 
+import {
+  useStyles,
+  useVariants,
+  mergeClassNames,
   createButtonStyles,
   createInputStyles,
   createSurfaceStyles,
-  commonStyles
+  commonStyles,
 } from '../utils/styled';
 import type { ThemeConfiguration, StyleDefinition } from '../types';
 
@@ -31,7 +31,7 @@ const ThemedComponent: React.FC = () => {
   const responsive = useResponsive();
   const isHighContrast = useHighContrast();
   const prefersReducedMotion = useReducedMotion();
-  
+
   const [inputValue, setInputValue] = useState('');
 
   // Create custom styles using theme
@@ -43,14 +43,14 @@ const ThemedComponent: React.FC = () => {
       boxShadow: theme.shadowMedium,
       fontFamily: theme.fontFamily,
       maxWidth: '600px',
-      margin: '0 auto'
+      margin: '0 auto',
     },
     responsive: {
       mobile: {
         padding: theme.spacing.md,
-        margin: theme.spacing.sm
-      }
-    }
+        margin: theme.spacing.sm,
+      },
+    },
   };
 
   const headingStyles: StyleDefinition = {
@@ -59,13 +59,13 @@ const ThemedComponent: React.FC = () => {
       fontSize: theme.typography.fontSize.xl,
       fontWeight: theme.typography.fontWeight.bold,
       marginBottom: theme.spacing.lg,
-      textAlign: 'center'
+      textAlign: 'center',
     },
     responsive: {
       mobile: {
-        fontSize: theme.typography.fontSize.lg
-      }
-    }
+        fontSize: theme.typography.fontSize.lg,
+      },
+    },
   };
 
   // Create button variants
@@ -75,8 +75,8 @@ const ThemedComponent: React.FC = () => {
       color: theme.textOnPrimary,
       border: `1px solid ${theme.primaryColor}`,
       '&:hover': {
-        backgroundColor: theme.primaryColorHover
-      }
+        backgroundColor: theme.primaryColorHover,
+      },
     }),
     secondary: (theme: any) => ({
       backgroundColor: 'transparent',
@@ -84,21 +84,21 @@ const ThemedComponent: React.FC = () => {
       border: `1px solid ${theme.primaryColor}`,
       '&:hover': {
         backgroundColor: theme.primaryColor,
-        color: theme.textOnPrimary
-      }
+        color: theme.textOnPrimary,
+      },
     }),
     success: (theme: any) => ({
       backgroundColor: theme.successColor,
       color: '#ffffff',
-      border: `1px solid ${theme.successColor}`
-    })
+      border: `1px solid ${theme.successColor}`,
+    }),
   };
 
   // Use styled utilities
   const containerClass = useStyles(containerStyles, theme);
   const headingClass = useStyles(headingStyles, theme);
   const buttonClasses = useVariants(buttonVariants, theme);
-  
+
   // Create input styles
   const inputStyles = createInputStyles(theme);
   const inputClass = useStyles(inputStyles, theme);
@@ -110,13 +110,26 @@ const ThemedComponent: React.FC = () => {
   return (
     <div className={containerClass}>
       <h1 className={headingClass}>Theme System Example</h1>
-      
+
       {/* Theme Information */}
-      <div className={mergeClassNames(surfaceClass, 'chat-spacing--md', 'chat-margin--md')}>
-        <h3 style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}>
+      <div
+        className={mergeClassNames(
+          surfaceClass,
+          'chat-spacing--md',
+          'chat-margin--md'
+        )}
+      >
+        <h3
+          style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}
+        >
           Current Theme Values
         </h3>
-        <ul style={{ color: theme.textSecondary, fontSize: theme.typography.fontSize.sm }}>
+        <ul
+          style={{
+            color: theme.textSecondary,
+            fontSize: theme.typography.fontSize.sm,
+          }}
+        >
           <li>Primary Color: {theme.primaryColor}</li>
           <li>Secondary Color: {theme.secondaryColor}</li>
           <li>Font Family: {theme.fontFamily}</li>
@@ -127,11 +140,24 @@ const ThemedComponent: React.FC = () => {
       </div>
 
       {/* Responsive Information */}
-      <div className={mergeClassNames(surfaceClass, 'chat-spacing--md', 'chat-margin--md')}>
-        <h3 style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}>
+      <div
+        className={mergeClassNames(
+          surfaceClass,
+          'chat-spacing--md',
+          'chat-margin--md'
+        )}
+      >
+        <h3
+          style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}
+        >
           Responsive Breakpoints
         </h3>
-        <ul style={{ color: theme.textSecondary, fontSize: theme.typography.fontSize.sm }}>
+        <ul
+          style={{
+            color: theme.textSecondary,
+            fontSize: theme.typography.fontSize.sm,
+          }}
+        >
           <li>Mobile: {responsive.mobile}</li>
           <li>Tablet: {responsive.tablet}</li>
           <li>Desktop: {responsive.desktop}</li>
@@ -140,17 +166,27 @@ const ThemedComponent: React.FC = () => {
 
       {/* Button Examples */}
       <div style={{ marginBottom: theme.spacing.lg }}>
-        <h3 style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}>
+        <h3
+          style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}
+        >
           Button Variants
         </h3>
-        <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
-          <button className={mergeClassNames('chat-button', buttonClasses.primary)}>
+        <div
+          style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}
+        >
+          <button
+            className={mergeClassNames('chat-button', buttonClasses.primary)}
+          >
             Primary Button
           </button>
-          <button className={mergeClassNames('chat-button', buttonClasses.secondary)}>
+          <button
+            className={mergeClassNames('chat-button', buttonClasses.secondary)}
+          >
             Secondary Button
           </button>
-          <button className={mergeClassNames('chat-button', buttonClasses.success)}>
+          <button
+            className={mergeClassNames('chat-button', buttonClasses.success)}
+          >
             Success Button
           </button>
         </div>
@@ -158,13 +194,15 @@ const ThemedComponent: React.FC = () => {
 
       {/* Input Example */}
       <div style={{ marginBottom: theme.spacing.lg }}>
-        <h3 style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}>
+        <h3
+          style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}
+        >
           Themed Input
         </h3>
         <input
           type="text"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={e => setInputValue(e.target.value)}
           placeholder="Type something..."
           className={inputClass}
         />
@@ -172,10 +210,18 @@ const ThemedComponent: React.FC = () => {
 
       {/* Typography Examples */}
       <div style={{ marginBottom: theme.spacing.lg }}>
-        <h3 style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}>
+        <h3
+          style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}
+        >
           Typography Scale
         </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.xs,
+          }}
+        >
           <span className="chat-text--xs">Extra Small Text (12px)</span>
           <span className="chat-text--sm">Small Text (14px)</span>
           <span className="chat-text--md">Medium Text (16px)</span>
@@ -186,10 +232,18 @@ const ThemedComponent: React.FC = () => {
 
       {/* Color Examples */}
       <div style={{ marginBottom: theme.spacing.lg }}>
-        <h3 style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}>
+        <h3
+          style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}
+        >
           Semantic Colors
         </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.xs,
+          }}
+        >
           <span className="chat-text--success">Success Text</span>
           <span className="chat-text--warning">Warning Text</span>
           <span className="chat-text--error">Error Text</span>
@@ -201,39 +255,43 @@ const ThemedComponent: React.FC = () => {
 
       {/* Animation Examples */}
       <div>
-        <h3 style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}>
+        <h3
+          style={{ color: theme.textPrimary, marginBottom: theme.spacing.sm }}
+        >
           Animations {prefersReducedMotion && '(Disabled - Reduced Motion)'}
         </h3>
-        <div style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
-          <div 
+        <div
+          style={{ display: 'flex', gap: theme.spacing.sm, flexWrap: 'wrap' }}
+        >
+          <div
             className="chat-animate-fade-in"
             style={{
               padding: theme.spacing.sm,
               backgroundColor: theme.surfaceColor,
               borderRadius: theme.borderRadius,
-              border: `1px solid ${theme.borderColor}`
+              border: `1px solid ${theme.borderColor}`,
             }}
           >
             Fade In
           </div>
-          <div 
+          <div
             className="chat-animate-slide-up"
             style={{
               padding: theme.spacing.sm,
               backgroundColor: theme.surfaceColor,
               borderRadius: theme.borderRadius,
-              border: `1px solid ${theme.borderColor}`
+              border: `1px solid ${theme.borderColor}`,
             }}
           >
             Slide Up
           </div>
-          <div 
+          <div
             className="chat-animate-bounce"
             style={{
               padding: theme.spacing.sm,
               backgroundColor: theme.surfaceColor,
               borderRadius: theme.borderRadius,
-              border: `1px solid ${theme.borderColor}`
+              border: `1px solid ${theme.borderColor}`,
             }}
           >
             Bounce
@@ -259,56 +317,101 @@ const ThemeControls: React.FC<{
       backgroundColor: currentTheme.surfaceColor,
       borderRadius: currentTheme.borderRadius,
       border: `1px solid ${currentTheme.borderColor}`,
-      marginBottom: currentTheme.spacing.lg
-    }
+      marginBottom: currentTheme.spacing.lg,
+    },
   };
 
   const controlsClass = useStyles(controlsStyles, currentTheme);
 
   return (
     <div className={controlsClass}>
-      <h3 style={{ marginBottom: currentTheme.spacing.md, color: currentTheme.textPrimary }}>
+      <h3
+        style={{
+          marginBottom: currentTheme.spacing.md,
+          color: currentTheme.textPrimary,
+        }}
+      >
         Theme Controls
       </h3>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: currentTheme.spacing.md }}>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: currentTheme.spacing.md,
+        }}
+      >
         <div>
-          <label style={{ display: 'block', marginBottom: currentTheme.spacing.xs, color: currentTheme.textSecondary }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: currentTheme.spacing.xs,
+              color: currentTheme.textSecondary,
+            }}
+          >
             Primary Color
           </label>
           <input
             type="color"
             value={theme.primaryColor || '#007bff'}
-            onChange={(e) => onThemeChange({ ...theme, primaryColor: e.target.value })}
-            style={{ width: '100%', height: '40px', border: 'none', borderRadius: currentTheme.borderRadius }}
+            onChange={e =>
+              onThemeChange({ ...theme, primaryColor: e.target.value })
+            }
+            style={{
+              width: '100%',
+              height: '40px',
+              border: 'none',
+              borderRadius: currentTheme.borderRadius,
+            }}
           />
         </div>
-        
+
         <div>
-          <label style={{ display: 'block', marginBottom: currentTheme.spacing.xs, color: currentTheme.textSecondary }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: currentTheme.spacing.xs,
+              color: currentTheme.textSecondary,
+            }}
+          >
             Secondary Color
           </label>
           <input
             type="color"
             value={theme.secondaryColor || '#6c757d'}
-            onChange={(e) => onThemeChange({ ...theme, secondaryColor: e.target.value })}
-            style={{ width: '100%', height: '40px', border: 'none', borderRadius: currentTheme.borderRadius }}
+            onChange={e =>
+              onThemeChange({ ...theme, secondaryColor: e.target.value })
+            }
+            style={{
+              width: '100%',
+              height: '40px',
+              border: 'none',
+              borderRadius: currentTheme.borderRadius,
+            }}
           />
         </div>
-        
+
         <div>
-          <label style={{ display: 'block', marginBottom: currentTheme.spacing.xs, color: currentTheme.textSecondary }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: currentTheme.spacing.xs,
+              color: currentTheme.textSecondary,
+            }}
+          >
             Border Radius
           </label>
           <select
             value={theme.borderRadius || '8px'}
-            onChange={(e) => onThemeChange({ ...theme, borderRadius: e.target.value })}
-            style={{ 
-              width: '100%', 
+            onChange={e =>
+              onThemeChange({ ...theme, borderRadius: e.target.value })
+            }
+            style={{
+              width: '100%',
               padding: currentTheme.spacing.sm,
               border: `1px solid ${currentTheme.borderColor}`,
               borderRadius: currentTheme.borderRadius,
-              backgroundColor: currentTheme.backgroundColor
+              backgroundColor: currentTheme.backgroundColor,
             }}
           >
             <option value="0px">None (0px)</option>
@@ -319,28 +422,44 @@ const ThemeControls: React.FC<{
             <option value="50%">Rounded (50%)</option>
           </select>
         </div>
-        
+
         <div>
-          <label style={{ display: 'block', marginBottom: currentTheme.spacing.xs, color: currentTheme.textSecondary }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: currentTheme.spacing.xs,
+              color: currentTheme.textSecondary,
+            }}
+          >
             Font Family
           </label>
           <select
             value={theme.fontFamily || currentTheme.fontFamily}
-            onChange={(e) => onThemeChange({ ...theme, fontFamily: e.target.value })}
-            style={{ 
-              width: '100%', 
+            onChange={e =>
+              onThemeChange({ ...theme, fontFamily: e.target.value })
+            }
+            style={{
+              width: '100%',
               padding: currentTheme.spacing.sm,
               border: `1px solid ${currentTheme.borderColor}`,
               borderRadius: currentTheme.borderRadius,
-              backgroundColor: currentTheme.backgroundColor
+              backgroundColor: currentTheme.backgroundColor,
             }}
           >
-            <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">System Default</option>
+            <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+              System Default
+            </option>
             <option value="Arial, sans-serif">Arial</option>
-            <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
-            <option value="'Times New Roman', Times, serif">Times New Roman</option>
+            <option value="'Helvetica Neue', Helvetica, sans-serif">
+              Helvetica
+            </option>
+            <option value="'Times New Roman', Times, serif">
+              Times New Roman
+            </option>
             <option value="Georgia, serif">Georgia</option>
-            <option value="'Courier New', Courier, monospace">Courier New</option>
+            <option value="'Courier New', Courier, monospace">
+              Courier New
+            </option>
           </select>
         </div>
       </div>
@@ -356,11 +475,18 @@ export const ThemeExample: React.FC = () => {
     primaryColor: '#007bff',
     secondaryColor: '#6c757d',
     borderRadius: '8px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   });
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa', padding: '20px' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#f8f9fa',
+        padding: '20px',
+      }}
+    >
       <ThemeProvider theme={customTheme}>
         <ThemeControls theme={customTheme} onThemeChange={setCustomTheme} />
         <ThemedComponent />

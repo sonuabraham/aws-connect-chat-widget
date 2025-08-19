@@ -94,8 +94,14 @@ class StyleSheet {
   /**
    * Create CSS rule string
    */
-  private createCSSRule(className: string, properties: React.CSSProperties, pseudoClass?: string): string {
-    const selector = pseudoClass ? `.${className}:${pseudoClass}` : `.${className}`;
+  private createCSSRule(
+    className: string,
+    properties: React.CSSProperties,
+    pseudoClass?: string
+  ): string {
+    const selector = pseudoClass
+      ? `.${className}:${pseudoClass}`
+      : `.${className}`;
     const cssString = this.cssPropertiesToString(properties);
     return `${selector} { ${cssString} }`;
   }
@@ -104,8 +110,8 @@ class StyleSheet {
    * Create responsive CSS rule
    */
   private createResponsiveCSSRule(
-    className: string, 
-    properties: React.CSSProperties, 
+    className: string,
+    properties: React.CSSProperties,
     breakpoint: string
   ): string {
     const cssString = this.cssPropertiesToString(properties);
@@ -126,15 +132,19 @@ class StyleSheet {
   /**
    * Create styled component with theme support
    */
-  createStyledComponent(styleDefinition: StyleDefinition, theme: ExtendedTheme): string {
+  createStyledComponent(
+    styleDefinition: StyleDefinition,
+    theme: ExtendedTheme
+  ): string {
     const className = this.generateClassName();
     const rules: string[] = [];
 
     // Process base styles
     if (styleDefinition.base) {
-      const baseStyles = typeof styleDefinition.base === 'function' 
-        ? styleDefinition.base(theme) 
-        : styleDefinition.base;
+      const baseStyles =
+        typeof styleDefinition.base === 'function'
+          ? styleDefinition.base(theme)
+          : styleDefinition.base;
       rules.push(this.createCSSRule(className, baseStyles));
     }
 
@@ -142,9 +152,10 @@ class StyleSheet {
     if (styleDefinition.states) {
       Object.entries(styleDefinition.states).forEach(([state, styleObject]) => {
         if (styleObject) {
-          const stateStyles = typeof styleObject === 'function' 
-            ? styleObject(theme) 
-            : styleObject;
+          const stateStyles =
+            typeof styleObject === 'function'
+              ? styleObject(theme)
+              : styleObject;
           rules.push(this.createCSSRule(className, stateStyles, state));
         }
       });
@@ -153,24 +164,41 @@ class StyleSheet {
     // Process responsive styles
     if (styleDefinition.responsive) {
       if (styleDefinition.responsive.mobile) {
-        const mobileStyles = typeof styleDefinition.responsive.mobile === 'function'
-          ? styleDefinition.responsive.mobile(theme)
-          : styleDefinition.responsive.mobile;
-        rules.push(this.createResponsiveCSSRule(className, mobileStyles, theme.breakpoints.mobile));
+        const mobileStyles =
+          typeof styleDefinition.responsive.mobile === 'function'
+            ? styleDefinition.responsive.mobile(theme)
+            : styleDefinition.responsive.mobile;
+        rules.push(
+          this.createResponsiveCSSRule(
+            className,
+            mobileStyles,
+            theme.breakpoints.mobile
+          )
+        );
       }
 
       if (styleDefinition.responsive.tablet) {
-        const tabletStyles = typeof styleDefinition.responsive.tablet === 'function'
-          ? styleDefinition.responsive.tablet(theme)
-          : styleDefinition.responsive.tablet;
-        rules.push(this.createResponsiveCSSRule(className, tabletStyles, theme.breakpoints.tablet));
+        const tabletStyles =
+          typeof styleDefinition.responsive.tablet === 'function'
+            ? styleDefinition.responsive.tablet(theme)
+            : styleDefinition.responsive.tablet;
+        rules.push(
+          this.createResponsiveCSSRule(
+            className,
+            tabletStyles,
+            theme.breakpoints.tablet
+          )
+        );
       }
 
       if (styleDefinition.responsive.desktop) {
-        const desktopStyles = typeof styleDefinition.responsive.desktop === 'function'
-          ? styleDefinition.responsive.desktop(theme)
-          : styleDefinition.responsive.desktop;
-        rules.push(`@media (min-width: ${theme.breakpoints.desktop}) { .${className} { ${this.cssPropertiesToString(desktopStyles)} } }`);
+        const desktopStyles =
+          typeof styleDefinition.responsive.desktop === 'function'
+            ? styleDefinition.responsive.desktop(theme)
+            : styleDefinition.responsive.desktop;
+        rules.push(
+          `@media (min-width: ${theme.breakpoints.desktop}) { .${className} { ${this.cssPropertiesToString(desktopStyles)} } }`
+        );
       }
     }
 
@@ -183,18 +211,20 @@ class StyleSheet {
   /**
    * Create variant classes
    */
-  createVariantClasses(variants: StyleVariants, theme: ExtendedTheme): Record<string, string> {
+  createVariantClasses(
+    variants: StyleVariants,
+    theme: ExtendedTheme
+  ): Record<string, string> {
     const variantClasses: Record<string, string> = {};
 
     Object.entries(variants).forEach(([variantName, styleObject]) => {
       const className = this.generateClassName();
-      const styles = typeof styleObject === 'function' 
-        ? styleObject(theme) 
-        : styleObject;
-      
+      const styles =
+        typeof styleObject === 'function' ? styleObject(theme) : styleObject;
+
       const rule = this.createCSSRule(className, styles);
       this.addCSSRules([rule]);
-      
+
       variantClasses[variantName] = className;
     });
 
@@ -205,7 +235,10 @@ class StyleSheet {
 /**
  * Create a styled component hook
  */
-export const useStyles = (styleDefinition: StyleDefinition, theme: ExtendedTheme): string => {
+export const useStyles = (
+  styleDefinition: StyleDefinition,
+  theme: ExtendedTheme
+): string => {
   const styleSheet = StyleSheet.getInstance();
   return React.useMemo(() => {
     return styleSheet.createStyledComponent(styleDefinition, theme);
@@ -215,7 +248,10 @@ export const useStyles = (styleDefinition: StyleDefinition, theme: ExtendedTheme
 /**
  * Create variant classes hook
  */
-export const useVariants = (variants: StyleVariants, theme: ExtendedTheme): Record<string, string> => {
+export const useVariants = (
+  variants: StyleVariants,
+  theme: ExtendedTheme
+): Record<string, string> => {
   const styleSheet = StyleSheet.getInstance();
   return React.useMemo(() => {
     return styleSheet.createVariantClasses(variants, theme);
@@ -225,7 +261,9 @@ export const useVariants = (variants: StyleVariants, theme: ExtendedTheme): Reco
 /**
  * Utility function to merge class names
  */
-export const mergeClassNames = (...classNames: (string | undefined | null | false)[]): string => {
+export const mergeClassNames = (
+  ...classNames: (string | undefined | null | false)[]
+): string => {
   return classNames.filter(Boolean).join(' ');
 };
 
@@ -240,14 +278,16 @@ export const createResponsiveStyles = (
   return {
     mobile,
     tablet,
-    desktop
+    desktop,
   };
 };
 
 /**
  * Create theme-based styles utility
  */
-export const createThemeStyles = (styleFunction: StyleFunction): StyleFunction => {
+export const createThemeStyles = (
+  styleFunction: StyleFunction
+): StyleFunction => {
   return styleFunction;
 };
 
@@ -262,24 +302,24 @@ export const commonStyles = {
     center: {
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     column: {
       display: 'flex',
-      flexDirection: 'column' as const
+      flexDirection: 'column' as const,
     },
     row: {
       display: 'flex',
-      flexDirection: 'row' as const
+      flexDirection: 'row' as const,
     },
     spaceBetween: {
       display: 'flex',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
     },
     alignCenter: {
       display: 'flex',
-      alignItems: 'center'
-    }
+      alignItems: 'center',
+    },
   },
 
   /**
@@ -287,17 +327,17 @@ export const commonStyles = {
    */
   position: {
     absolute: {
-      position: 'absolute' as const
+      position: 'absolute' as const,
     },
     relative: {
-      position: 'relative' as const
+      position: 'relative' as const,
     },
     fixed: {
-      position: 'fixed' as const
+      position: 'fixed' as const,
     },
     sticky: {
-      position: 'sticky' as const
-    }
+      position: 'sticky' as const,
+    },
   },
 
   /**
@@ -305,19 +345,19 @@ export const commonStyles = {
    */
   text: {
     center: {
-      textAlign: 'center' as const
+      textAlign: 'center' as const,
     },
     left: {
-      textAlign: 'left' as const
+      textAlign: 'left' as const,
     },
     right: {
-      textAlign: 'right' as const
+      textAlign: 'right' as const,
     },
     ellipsis: {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap' as const
-    }
+      whiteSpace: 'nowrap' as const,
+    },
   },
 
   /**
@@ -325,10 +365,10 @@ export const commonStyles = {
    */
   visibility: {
     hidden: {
-      visibility: 'hidden' as const
+      visibility: 'hidden' as const,
     },
     visible: {
-      visibility: 'visible' as const
+      visibility: 'visible' as const,
     },
     srOnly: {
       position: 'absolute' as const,
@@ -339,8 +379,8 @@ export const commonStyles = {
       overflow: 'hidden',
       clip: 'rect(0, 0, 0, 0)',
       whiteSpace: 'nowrap' as const,
-      border: '0'
-    }
+      border: '0',
+    },
   },
 
   /**
@@ -348,15 +388,15 @@ export const commonStyles = {
    */
   animation: {
     fadeIn: (theme: ExtendedTheme) => ({
-      animation: `chat-fade-in ${theme.animation.duration.normal} ${theme.animation.easing.easeInOut}`
+      animation: `chat-fade-in ${theme.animation.duration.normal} ${theme.animation.easing.easeInOut}`,
     }),
     slideUp: (theme: ExtendedTheme) => ({
-      animation: `chat-slide-up ${theme.animation.duration.normal} ${theme.animation.easing.easeInOut}`
+      animation: `chat-slide-up ${theme.animation.duration.normal} ${theme.animation.easing.easeInOut}`,
     }),
     bounce: (theme: ExtendedTheme) => ({
-      animation: `chat-bounce ${theme.animation.duration.slow} ${theme.animation.easing.easeInOut}`
-    })
-  }
+      animation: `chat-bounce ${theme.animation.duration.slow} ${theme.animation.easing.easeInOut}`,
+    }),
+  },
 };
 
 /**
@@ -377,23 +417,23 @@ export const createButtonStyles = (theme: ExtendedTheme): StyleDefinition => ({
     cursor: 'pointer',
     transition: `all ${theme.animation.duration.normal} ${theme.animation.easing.easeInOut}`,
     userSelect: 'none',
-    outline: 'none'
+    outline: 'none',
   },
   states: {
     'focus-visible': {
-      boxShadow: `0 0 0 2px ${theme.primaryColor}`
+      boxShadow: `0 0 0 2px ${theme.primaryColor}`,
     },
     disabled: {
       opacity: 0.6,
-      cursor: 'not-allowed'
-    }
+      cursor: 'not-allowed',
+    },
   },
   responsive: {
     mobile: {
       fontSize: theme.typography.fontSize.xs,
-      padding: `${theme.spacing.xs} ${theme.spacing.sm}`
-    }
-  }
+      padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+    },
+  },
 });
 
 /**
@@ -410,19 +450,19 @@ export const createInputStyles = (theme: ExtendedTheme): StyleDefinition => ({
     color: theme.textPrimary,
     backgroundColor: theme.backgroundColor,
     transition: `border-color ${theme.animation.duration.normal} ${theme.animation.easing.easeInOut}, box-shadow ${theme.animation.duration.normal} ${theme.animation.easing.easeInOut}`,
-    outline: 'none'
+    outline: 'none',
   },
   states: {
     focus: {
       borderColor: theme.primaryColor,
-      boxShadow: `0 0 0 2px rgba(${theme.primaryColorRgb}, 0.25)`
+      boxShadow: `0 0 0 2px rgba(${theme.primaryColorRgb}, 0.25)`,
     },
     disabled: {
       backgroundColor: theme.surfaceColor,
       color: theme.textDisabled,
-      cursor: 'not-allowed'
-    }
-  }
+      cursor: 'not-allowed',
+    },
+  },
 });
 
 /**
@@ -433,8 +473,8 @@ export const createSurfaceStyles = (theme: ExtendedTheme): StyleDefinition => ({
     backgroundColor: theme.backgroundColor,
     border: `1px solid ${theme.borderColor}`,
     borderRadius: theme.borderRadius,
-    boxShadow: theme.shadowSmall
-  }
+    boxShadow: theme.shadowSmall,
+  },
 });
 
 export default {
@@ -446,5 +486,5 @@ export default {
   commonStyles,
   createButtonStyles,
   createInputStyles,
-  createSurfaceStyles
+  createSurfaceStyles,
 };

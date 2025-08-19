@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import type { MessageListProps, MessageBubbleProps, TypingIndicatorProps } from '../types/ui';
+import type {
+  MessageListProps,
+  MessageBubbleProps,
+  TypingIndicatorProps,
+} from '../types/ui';
 import type { Message } from '../types/chat';
 import '../styles/MessageList.css';
 
@@ -24,29 +28,76 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
     switch (message.status) {
       case 'sending':
         return (
-          <svg width="12" height="12" viewBox="0 0 12 12" className="message-bubble__status-icon">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            className="message-bubble__status-icon"
+          >
             <circle cx="6" cy="6" r="2" fill="currentColor" opacity="0.5">
-              <animate attributeName="opacity" values="0.5;1;0.5" dur="1s" repeatCount="indefinite" />
+              <animate
+                attributeName="opacity"
+                values="0.5;1;0.5"
+                dur="1s"
+                repeatCount="indefinite"
+              />
             </circle>
           </svg>
         );
       case 'sent':
         return (
-          <svg width="12" height="12" viewBox="0 0 12 12" className="message-bubble__status-icon">
-            <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            className="message-bubble__status-icon"
+          >
+            <path
+              d="M2 6L5 9L10 3"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              fill="none"
+            />
           </svg>
         );
       case 'delivered':
         return (
-          <svg width="12" height="12" viewBox="0 0 12 12" className="message-bubble__status-icon">
-            <path d="M1 6L4 9L9 3" stroke="currentColor" strokeWidth="1.5" fill="none" />
-            <path d="M3 6L6 9L11 3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            className="message-bubble__status-icon"
+          >
+            <path
+              d="M1 6L4 9L9 3"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              fill="none"
+            />
+            <path
+              d="M3 6L6 9L11 3"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              fill="none"
+            />
           </svg>
         );
       case 'failed':
         return (
-          <svg width="12" height="12" viewBox="0 0 12 12" className="message-bubble__status-icon message-bubble__status-icon--error">
-            <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1" fill="none" />
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            className="message-bubble__status-icon message-bubble__status-icon--error"
+          >
+            <circle
+              cx="6"
+              cy="6"
+              r="5"
+              stroke="currentColor"
+              strokeWidth="1"
+              fill="none"
+            />
             <path d="M4 4L8 8M8 4L4 8" stroke="currentColor" strokeWidth="1" />
           </svg>
         );
@@ -56,7 +107,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   };
 
   return (
-    <div className={`message-bubble ${isOwn ? 'message-bubble--own' : 'message-bubble--other'}`}>
+    <div
+      className={`message-bubble ${isOwn ? 'message-bubble--own' : 'message-bubble--other'}`}
+    >
       {!isOwn && agentInfo?.profileImage && (
         <img
           src={agentInfo.profileImage}
@@ -71,7 +124,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         <div className="message-bubble__text">{message.content}</div>
         {showTimestamp && (
           <div className="message-bubble__meta">
-            <span className="message-bubble__time">{formatTime(message.timestamp)}</span>
+            <span className="message-bubble__time">
+              {formatTime(message.timestamp)}
+            </span>
             {isOwn && getStatusIcon()}
           </div>
         )}
@@ -83,7 +138,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
 /**
  * TypingIndicator component for agent typing status
  */
-const TypingIndicator: React.FC<TypingIndicatorProps> = ({ isVisible, agentName }) => {
+const TypingIndicator: React.FC<TypingIndicatorProps> = ({
+  isVisible,
+  agentName,
+}) => {
   if (!isVisible) return null;
 
   return (
@@ -129,14 +187,14 @@ export const MessageList: React.FC<MessageListProps> = ({
     const element = event.currentTarget;
     const { scrollTop, scrollHeight, clientHeight } = element;
     const scrollPosition = scrollTop / (scrollHeight - clientHeight);
-    
+
     // Call parent scroll handler
     onScroll(scrollPosition);
-    
+
     // Determine if user has scrolled away from bottom
     const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
     setShouldAutoScroll(isAtBottom);
-    
+
     if (!userHasScrolled && scrollTop > 0) {
       setUserHasScrolled(true);
     }
@@ -148,9 +206,9 @@ export const MessageList: React.FC<MessageListProps> = ({
     let currentDate = '';
     let currentGroup: Message[] = [];
 
-    messages.forEach((message) => {
+    messages.forEach(message => {
       const messageDate = message.timestamp.toDateString();
-      
+
       if (messageDate !== currentDate) {
         if (currentGroup.length > 0) {
           groups.push({ date: currentDate, messages: currentGroup });
@@ -218,7 +276,7 @@ export const MessageList: React.FC<MessageListProps> = ({
           </div>
         )}
 
-        {messageGroups.map((group) => (
+        {messageGroups.map(group => (
           <div key={group.date} className="message-list__group">
             <div className="message-list__date-header">
               <span className="message-list__date-text">
@@ -227,10 +285,10 @@ export const MessageList: React.FC<MessageListProps> = ({
             </div>
             {group.messages.map((message, messageIndex) => {
               const isOwn = message.sender === 'visitor';
-              const showTimestamp = 
-                messageIndex === group.messages.length - 1 || 
-                (messageIndex < group.messages.length - 1 && 
-                 group.messages[messageIndex + 1].sender !== message.sender);
+              const showTimestamp =
+                messageIndex === group.messages.length - 1 ||
+                (messageIndex < group.messages.length - 1 &&
+                  group.messages[messageIndex + 1].sender !== message.sender);
 
               return (
                 <MessageBubble
@@ -262,10 +320,7 @@ export const MessageList: React.FC<MessageListProps> = ({
           type="button"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M8 12L3 7H13L8 12Z"
-              fill="currentColor"
-            />
+            <path d="M8 12L3 7H13L8 12Z" fill="currentColor" />
           </svg>
         </button>
       )}

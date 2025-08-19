@@ -54,7 +54,12 @@ export const AgentInfo: React.FC<AgentInfoProps> = ({
 
   // Handle agent disconnection notification
   React.useEffect(() => {
-    if (agent && agent.status === 'offline' && isConnected && onAgentDisconnected) {
+    if (
+      agent &&
+      agent.status === 'offline' &&
+      isConnected &&
+      onAgentDisconnected
+    ) {
       onAgentDisconnected();
     }
   }, [agent?.status, isConnected, onAgentDisconnected]);
@@ -101,7 +106,7 @@ export const AgentInfo: React.FC<AgentInfoProps> = ({
               src={agent.profileImage}
               alt={`${agent.name} profile`}
               className="agent-info__avatar"
-              onError={(e) => {
+              onError={e => {
                 // Fallback to default avatar on image load error
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
@@ -140,7 +145,11 @@ export const AgentInfo: React.FC<AgentInfoProps> = ({
           </div>
           <div className="agent-info__status">
             {showTypingIndicator && agent.isTyping ? (
-              <div className="agent-info__typing" role="status" aria-live="polite">
+              <div
+                className="agent-info__typing"
+                role="status"
+                aria-live="polite"
+              >
                 <div className="agent-info__typing-dots">
                   <span className="agent-info__typing-dot" />
                   <span className="agent-info__typing-dot" />

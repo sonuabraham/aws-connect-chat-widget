@@ -21,7 +21,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
   const windowRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const [showDisconnectionNotification, setShowDisconnectionNotification] = useState(false);
+  const [showDisconnectionNotification, setShowDisconnectionNotification] =
+    useState(false);
 
   // Focus management for accessibility
   useEffect(() => {
@@ -59,11 +60,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       case 'waiting':
         return config.messages.waitingMessage || 'Waiting for an agent...';
       case 'connected':
-        return chatState.agent ? `Connected to ${chatState.agent.name}` : 'Connected';
+        return chatState.agent
+          ? `Connected to ${chatState.agent.name}`
+          : 'Connected';
       case 'ended':
         return 'Chat ended';
       default:
-        return config.messages.welcomeMessage || 'Welcome! How can we help you?';
+        return (
+          config.messages.welcomeMessage || 'Welcome! How can we help you?'
+        );
     }
   };
 

@@ -70,13 +70,15 @@ export const ChatTranscriptDialog: React.FC<ChatTranscriptDialogProps> = ({
 
   const generateTranscriptText = (): string => {
     const lines: string[] = [];
-    
+
     // Header
     lines.push('CHAT TRANSCRIPT');
     lines.push('================');
     lines.push('');
     lines.push(`Session ID: ${chatState.visitor.sessionId}`);
-    lines.push(`Date: ${formatTimestamp(chatState.session?.startTime || new Date())}`);
+    lines.push(
+      `Date: ${formatTimestamp(chatState.session?.startTime || new Date())}`
+    );
     lines.push(`Duration: ${sessionDuration}`);
     lines.push(`Visitor: ${chatState.visitor.name}`);
     if (chatState.agent) {
@@ -86,20 +88,22 @@ export const ChatTranscriptDialog: React.FC<ChatTranscriptDialogProps> = ({
     lines.push('CONVERSATION');
     lines.push('============');
     lines.push('');
-    
+
     // Messages
     chatState.messages
       .filter(msg => msg.sender !== 'system')
       .forEach(message => {
         const time = formatMessageTime(message.timestamp);
-        const sender = message.sender === 'visitor' ? chatState.visitor.name : 
-                      (chatState.agent?.name || 'Agent');
+        const sender =
+          message.sender === 'visitor'
+            ? chatState.visitor.name
+            : chatState.agent?.name || 'Agent';
         lines.push(`[${time}] ${sender}: ${message.content}`);
       });
-    
+
     lines.push('');
     lines.push('End of transcript');
-    
+
     return lines.join('\n');
   };
 
@@ -108,7 +112,11 @@ export const ChatTranscriptDialog: React.FC<ChatTranscriptDialogProps> = ({
   }
 
   return (
-    <div className="chat-transcript-dialog-overlay" role="dialog" aria-modal="true">
+    <div
+      className="chat-transcript-dialog-overlay"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="chat-transcript-dialog">
         <div className="chat-transcript-dialog__header">
           <h3 className="chat-transcript-dialog__title">Chat Transcript</h3>
@@ -128,17 +136,23 @@ export const ChatTranscriptDialog: React.FC<ChatTranscriptDialogProps> = ({
             </svg>
           </button>
         </div>
-        
+
         <div className="chat-transcript-dialog__content">
           <div className="transcript-summary">
             <div className="transcript-summary__stats">
               <div className="transcript-stat">
-                <span className="transcript-stat__label">Session Duration:</span>
-                <span className="transcript-stat__value">{sessionDuration}</span>
+                <span className="transcript-stat__label">
+                  Session Duration:
+                </span>
+                <span className="transcript-stat__value">
+                  {sessionDuration}
+                </span>
               </div>
               <div className="transcript-stat">
                 <span className="transcript-stat__label">Messages:</span>
-                <span className="transcript-stat__value">{getMessageCount()}</span>
+                <span className="transcript-stat__value">
+                  {getMessageCount()}
+                </span>
               </div>
               <div className="transcript-stat">
                 <span className="transcript-stat__label">Date:</span>
@@ -148,7 +162,7 @@ export const ChatTranscriptDialog: React.FC<ChatTranscriptDialogProps> = ({
               </div>
             </div>
           </div>
-          
+
           <div className="transcript-preview">
             <div className="transcript-preview__header">
               <h4>Preview</h4>
@@ -161,8 +175,9 @@ export const ChatTranscriptDialog: React.FC<ChatTranscriptDialogProps> = ({
                   <div key={message.id} className="transcript-message">
                     <div className="transcript-message__meta">
                       <span className="transcript-message__sender">
-                        {message.sender === 'visitor' ? chatState.visitor.name : 
-                         (chatState.agent?.name || 'Agent')}
+                        {message.sender === 'visitor'
+                          ? chatState.visitor.name
+                          : chatState.agent?.name || 'Agent'}
                       </span>
                       <span className="transcript-message__time">
                         {formatMessageTime(message.timestamp)}
@@ -173,7 +188,7 @@ export const ChatTranscriptDialog: React.FC<ChatTranscriptDialogProps> = ({
                     </div>
                   </div>
                 ))}
-              
+
               {getMessageCount() > 5 && (
                 <div className="transcript-preview__more">
                   ... and {getMessageCount() - 5} more messages
@@ -182,7 +197,7 @@ export const ChatTranscriptDialog: React.FC<ChatTranscriptDialogProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="chat-transcript-dialog__actions">
           <button
             className="chat-transcript-dialog__button chat-transcript-dialog__button--secondary"
@@ -205,7 +220,7 @@ export const ChatTranscriptDialog: React.FC<ChatTranscriptDialogProps> = ({
             </svg>
             Copy to Clipboard
           </button>
-          
+
           <button
             className="chat-transcript-dialog__button chat-transcript-dialog__button--primary"
             onClick={handleDownload}

@@ -60,8 +60,11 @@ describe('ConnectService', () => {
     };
 
     it('should throw error when startChatContact is not implemented', async () => {
-      await expect(connectService.initializeChat(mockParticipantDetails))
-        .rejects.toThrow('StartChatContact must be implemented by backend service');
+      await expect(
+        connectService.initializeChat(mockParticipantDetails)
+      ).rejects.toThrow(
+        'StartChatContact must be implemented by backend service'
+      );
     });
 
     it('should notify connection status changes', async () => {
@@ -81,8 +84,9 @@ describe('ConnectService', () => {
 
   describe('sendMessage', () => {
     it('should throw error when no active session', async () => {
-      await expect(connectService.sendMessage('Hello'))
-        .rejects.toThrow('No active chat session');
+      await expect(connectService.sendMessage('Hello')).rejects.toThrow(
+        'No active chat session'
+      );
     });
 
     it('should send message when session is active', async () => {
@@ -99,20 +103,22 @@ describe('ConnectService', () => {
       (connectService as any).connectionToken = 'mock-token';
       mockClient.send.mockRejectedValue(new Error('Network error'));
 
-      await expect(connectService.sendMessage('Hello'))
-        .rejects.toThrow('Failed to send message: Network error');
+      await expect(connectService.sendMessage('Hello')).rejects.toThrow(
+        'Failed to send message: Network error'
+      );
     });
   });
 
   describe('receiveMessages', () => {
     it('should throw error when no active session', async () => {
-      await expect(connectService.receiveMessages())
-        .rejects.toThrow('No active chat session');
+      await expect(connectService.receiveMessages()).rejects.toThrow(
+        'No active chat session'
+      );
     });
 
     it('should receive and convert messages', async () => {
       (connectService as any).connectionToken = 'mock-token';
-      
+
       const mockTranscript = [
         {
           Id: '1',
@@ -164,8 +170,9 @@ describe('ConnectService', () => {
       const statusCallback = vi.fn();
       connectService.onConnectionStatusChange(statusCallback);
 
-      await expect(connectService.endChat())
-        .rejects.toThrow('Failed to end chat: Disconnect failed');
+      await expect(connectService.endChat()).rejects.toThrow(
+        'Failed to end chat: Disconnect failed'
+      );
 
       // Should still cleanup
       expect((connectService as any).connectionToken).toBeNull();
@@ -191,7 +198,9 @@ describe('ConnectService', () => {
       const callback = vi.fn();
       connectService.onConnectionStatusChange(callback);
 
-      expect((connectService as any).connectionStatusCallbacks).toContain(callback);
+      expect((connectService as any).connectionStatusCallbacks).toContain(
+        callback
+      );
     });
   });
 
@@ -219,13 +228,14 @@ describe('ConnectService', () => {
 
   describe('refreshConnectionToken', () => {
     it('should throw error when no participant token', async () => {
-      await expect(connectService.refreshConnectionToken())
-        .rejects.toThrow('No participant token available for refresh');
+      await expect(connectService.refreshConnectionToken()).rejects.toThrow(
+        'No participant token available for refresh'
+      );
     });
 
     it('should refresh token when participant token exists', async () => {
       (connectService as any).participantToken = 'mock-participant-token';
-      
+
       const mockResponse = {
         ConnectionCredentials: {
           ConnectionToken: 'new-token',
@@ -269,7 +279,9 @@ describe('ConnectService', () => {
       };
 
       // Simulate WebSocket message
-      const handleMessage = (connectService as any).handleWebSocketMessage.bind(connectService);
+      const handleMessage = (connectService as any).handleWebSocketMessage.bind(
+        connectService
+      );
       handleMessage({ data: JSON.stringify(mockMessage) });
 
       expect(messageCallback).toHaveBeenCalledWith(
@@ -293,7 +305,9 @@ describe('ConnectService', () => {
         AbsoluteTime: '2023-01-01T00:00:00Z',
       };
 
-      const handleMessage = (connectService as any).handleWebSocketMessage.bind(connectService);
+      const handleMessage = (connectService as any).handleWebSocketMessage.bind(
+        connectService
+      );
       handleMessage({ data: JSON.stringify(mockTypingEvent) });
 
       expect(agentStatusCallback).toHaveBeenCalledWith({
@@ -304,9 +318,13 @@ describe('ConnectService', () => {
     });
 
     it('should handle malformed WebSocket messages gracefully', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
-      const handleMessage = (connectService as any).handleWebSocketMessage.bind(connectService);
+      const handleMessage = (connectService as any).handleWebSocketMessage.bind(
+        connectService
+      );
       handleMessage({ data: 'invalid json' });
 
       expect(consoleSpy).toHaveBeenCalledWith(

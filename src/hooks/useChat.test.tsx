@@ -52,7 +52,10 @@ describe('useChat', () => {
     const { result } = renderHook(() => useChat(mockConnectService));
 
     await act(async () => {
-      await result.current.initializeChat({ name: 'Test User', email: 'test@example.com' });
+      await result.current.initializeChat({
+        name: 'Test User',
+        email: 'test@example.com',
+      });
     });
 
     expect(result.current.chatState.status).toBe('connected');

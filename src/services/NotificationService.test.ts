@@ -133,7 +133,7 @@ describe('NotificationService', () => {
       const notification1 = notificationService.getNotification(id1);
       const notification2 = notificationService.getNotification(id2);
 
-      expect(notification1?.message).toContain('message couldn\'t be sent');
+      expect(notification1?.message).toContain("message couldn't be sent");
       expect(notification2?.message).toContain('chat session has expired');
     });
   });
@@ -155,8 +155,8 @@ describe('NotificationService', () => {
       notificationService.showConnectionStatus('connected');
 
       const notifications = notificationService.getNotifications();
-      const statusNotifications = notifications.filter(n => 
-        n.title.includes('Connect') || n.title.includes('Disconnect')
+      const statusNotifications = notifications.filter(
+        n => n.title.includes('Connect') || n.title.includes('Disconnect')
       );
 
       expect(statusNotifications).toHaveLength(1);
@@ -261,8 +261,10 @@ describe('NotificationService', () => {
         message: 'Error message',
       });
 
-      const infoNotifications = notificationService.getNotificationsByType('info');
-      const errorNotifications = notificationService.getNotificationsByType('error');
+      const infoNotifications =
+        notificationService.getNotificationsByType('info');
+      const errorNotifications =
+        notificationService.getNotificationsByType('error');
 
       expect(infoNotifications).toHaveLength(1);
       expect(errorNotifications).toHaveLength(1);
@@ -294,8 +296,12 @@ describe('NotificationService', () => {
 
       notificationService.removeNotificationsByType('info');
 
-      expect(notificationService.getNotificationsByType('info')).toHaveLength(0);
-      expect(notificationService.getNotificationsByType('error')).toHaveLength(1);
+      expect(notificationService.getNotificationsByType('info')).toHaveLength(
+        0
+      );
+      expect(notificationService.getNotificationsByType('error')).toHaveLength(
+        1
+      );
     });
   });
 

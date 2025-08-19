@@ -50,7 +50,7 @@ export const ChatSessionManager: React.FC<ChatSessionManagerProps> = ({
   const handleConfirmEndChat = () => {
     setShowEndDialog(false);
     onEndChat();
-    
+
     // Show rating dialog if enabled and no rating exists
     if (enableRatings && !chatRating) {
       setTimeout(() => {
@@ -98,14 +98,14 @@ export const ChatSessionManager: React.FC<ChatSessionManagerProps> = ({
 
   const getSessionDuration = (): string => {
     if (!chatState.session?.startTime) return '0:00';
-    
+
     const start = chatState.session.startTime;
     const end = chatState.status === 'ended' ? new Date() : new Date();
     const duration = Math.floor((end.getTime() - start.getTime()) / 1000);
-    
+
     const minutes = Math.floor(duration / 60);
     const seconds = duration % 60;
-    
+
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
@@ -140,7 +140,7 @@ export const ChatSessionManager: React.FC<ChatSessionManagerProps> = ({
             </svg>
             End Chat
           </button>
-          
+
           {enableTranscript && (
             <button
               className="session-control-button session-control-button--transcript"
@@ -177,7 +177,9 @@ export const ChatSessionManager: React.FC<ChatSessionManagerProps> = ({
           <div className="session-summary__stats">
             <div className="session-stat">
               <span className="session-stat__label">Duration:</span>
-              <span className="session-stat__value">{getSessionDuration()}</span>
+              <span className="session-stat__value">
+                {getSessionDuration()}
+              </span>
             </div>
             <div className="session-stat">
               <span className="session-stat__label">Messages:</span>
@@ -186,11 +188,13 @@ export const ChatSessionManager: React.FC<ChatSessionManagerProps> = ({
             {chatState.agent && (
               <div className="session-stat">
                 <span className="session-stat__label">Agent:</span>
-                <span className="session-stat__value">{chatState.agent.name}</span>
+                <span className="session-stat__value">
+                  {chatState.agent.name}
+                </span>
               </div>
             )}
           </div>
-          
+
           <div className="session-summary__actions">
             {enableRatings && !chatRating && (
               <button
@@ -201,7 +205,7 @@ export const ChatSessionManager: React.FC<ChatSessionManagerProps> = ({
                 Rate This Chat
               </button>
             )}
-            
+
             {enableTranscript && (
               <button
                 className="session-action-button session-action-button--secondary"
@@ -212,11 +216,11 @@ export const ChatSessionManager: React.FC<ChatSessionManagerProps> = ({
               </button>
             )}
           </div>
-          
+
           {chatRating && (
             <div className="session-rating-display">
               <div className="rating-stars">
-                {[1, 2, 3, 4, 5].map((star) => (
+                {[1, 2, 3, 4, 5].map(star => (
                   <svg
                     key={star}
                     width="16"

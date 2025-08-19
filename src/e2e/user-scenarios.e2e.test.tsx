@@ -1,5 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { ChatWidget } from '../components/ChatWidget';
@@ -96,7 +102,7 @@ describe('End-to-End User Scenarios', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    
+
     // Reset WebSocket mock
     Object.assign(mockWebSocket, {
       send: vi.fn(),
@@ -115,7 +121,7 @@ describe('End-to-End User Scenarios', () => {
   describe('Complete Visitor Chat Journey', () => {
     it('should complete full visitor journey from widget discovery to chat completion', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Scenario: Visitor discovers the chat widget
@@ -176,7 +182,8 @@ describe('End-to-End User Scenarios', () => {
       // Scenario: Agent responds
       const mockAgentMessage = {
         Type: 'MESSAGE',
-        Content: 'Hello! I\'d be happy to help you with your account. What specific issue are you experiencing?',
+        Content:
+          "Hello! I'd be happy to help you with your account. What specific issue are you experiencing?",
         ParticipantId: 'agent-123',
         DisplayName: 'Agent Sarah',
         Timestamp: new Date().toISOString(),
@@ -195,18 +202,21 @@ describe('End-to-End User Scenarios', () => {
 
       // Agent message should appear
       await waitFor(() => {
-        expect(screen.getByText(/I'd be happy to help you with your account/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/I'd be happy to help you with your account/)
+        ).toBeInTheDocument();
       });
 
       // Scenario: Visitor continues conversation
       await user.clear(messageInput);
-      await user.type(messageInput, 'I can\'t log into my account');
+      await user.type(messageInput, "I can't log into my account");
       await user.keyboard('{Enter}');
 
       // Scenario: Agent provides solution
       const mockSolutionMessage = {
         Type: 'MESSAGE',
-        Content: 'I can help you reset your password. Please check your email for a reset link.',
+        Content:
+          'I can help you reset your password. Please check your email for a reset link.',
         ParticipantId: 'agent-123',
         DisplayName: 'Agent Sarah',
         Timestamp: new Date().toISOString(),
@@ -224,7 +234,9 @@ describe('End-to-End User Scenarios', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText(/check your email for a reset link/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/check your email for a reset link/)
+        ).toBeInTheDocument();
       });
 
       // Scenario: Visitor thanks and ends chat
@@ -260,12 +272,14 @@ describe('End-to-End User Scenarios', () => {
       });
 
       // Chat button should be visible again
-      expect(screen.getByRole('button', { name: 'Open chat' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Open chat' })
+      ).toBeInTheDocument();
     });
 
     it('should handle visitor reconnection after network interruption', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Start chat
@@ -332,7 +346,7 @@ describe('End-to-End User Scenarios', () => {
   describe('Widget Customization and Theme Application', () => {
     it('should apply custom theme throughout the user experience', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       const customConfig = {
         ...mockConfig,
         ui: {
@@ -371,7 +385,7 @@ describe('End-to-End User Scenarios', () => {
 
     it('should handle different positioning configurations', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       const leftPositionConfig = {
         ...mockConfig,
         ui: {
@@ -390,7 +404,7 @@ describe('End-to-End User Scenarios', () => {
 
       // Button should be positioned on the left
       // (Positioning is tested through the component's style application)
-      
+
       await user.click(chatButton);
 
       await waitFor(() => {
@@ -402,7 +416,7 @@ describe('End-to-End User Scenarios', () => {
   describe('Mobile Responsiveness', () => {
     it('should adapt interface for mobile devices', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       // Mock mobile viewport
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
@@ -454,14 +468,14 @@ describe('End-to-End User Scenarios', () => {
 
       // Send message with touch
       await user.keyboard('{Enter}');
-      
+
       // Should handle mobile-specific interactions
       expect(messageInput).toHaveValue('');
     });
 
     it('should handle orientation changes', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       await user.click(screen.getByRole('button', { name: 'Open chat' }));
@@ -473,14 +487,14 @@ describe('End-to-End User Scenarios', () => {
       // Simulate orientation change
       Object.defineProperty(window, 'innerWidth', { value: 667 });
       Object.defineProperty(window, 'innerHeight', { value: 375 });
-      
+
       fireEvent(window, new Event('orientationchange'));
       fireEvent(window, new Event('resize'));
 
       // Chat should remain functional
       const messageInput = screen.getByLabelText('Type your message');
       expect(messageInput).toBeInTheDocument();
-      
+
       await user.type(messageInput, 'Orientation change test');
       await user.keyboard('{Enter}');
     });
@@ -489,7 +503,7 @@ describe('End-to-End User Scenarios', () => {
   describe('Cross-Browser Compatibility', () => {
     it('should work with different user agents', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       // Mock different browsers
       const browsers = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -516,15 +530,18 @@ describe('End-to-End User Scenarios', () => {
         });
 
         const messageInput = screen.getByLabelText('Type your message');
-        await user.type(messageInput, `Test from ${userAgent.includes('Chrome') ? 'Chrome' : userAgent.includes('Firefox') ? 'Firefox' : 'Safari'}`);
-        
+        await user.type(
+          messageInput,
+          `Test from ${userAgent.includes('Chrome') ? 'Chrome' : userAgent.includes('Firefox') ? 'Firefox' : 'Safari'}`
+        );
+
         expect(messageInput).toHaveValue(expect.stringContaining('Test from'));
       }
     });
 
     it('should handle browser-specific features gracefully', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       // Mock missing browser features
       const originalClipboard = navigator.clipboard;
       delete (navigator as any).clipboard;
@@ -550,11 +567,13 @@ describe('End-to-End User Scenarios', () => {
   describe('Complete Widget Lifecycle', () => {
     it('should handle complete widget lifecycle from initialization to cleanup', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       const { unmount } = render(<ChatWidget config={mockConfig} />);
 
       // Initialize
-      expect(screen.getByRole('button', { name: 'Open chat' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Open chat' })
+      ).toBeInTheDocument();
 
       // Open and use
       await user.click(screen.getByRole('button', { name: 'Open chat' }));
@@ -604,7 +623,7 @@ describe('End-to-End User Scenarios', () => {
 
     it('should persist session data across widget interactions', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Start chat
@@ -640,7 +659,9 @@ describe('End-to-End User Scenarios', () => {
       await user.type(messageInput, 'Third message after reopen');
       await user.keyboard('{Enter}');
 
-      expect(screen.getByText('Third message after reopen')).toBeInTheDocument();
+      expect(
+        screen.getByText('Third message after reopen')
+      ).toBeInTheDocument();
     });
   });
 
@@ -648,7 +669,7 @@ describe('End-to-End User Scenarios', () => {
     it('should handle and recover from various error scenarios', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       const onError = vi.fn();
-      
+
       render(<ChatWidget config={mockConfig} onError={onError} />);
 
       // Start chat
@@ -659,7 +680,7 @@ describe('End-to-End User Scenarios', () => {
       });
 
       // Simulate various error scenarios
-      
+
       // 1. WebSocket connection error
       act(() => {
         const errorHandler = mockWebSocket.addEventListener.mock.calls.find(
@@ -695,7 +716,7 @@ describe('End-to-End User Scenarios', () => {
 
       // 3. Recovery - fix connection
       mockWebSocket.send.mockImplementation(() => {});
-      
+
       act(() => {
         const openHandler = mockWebSocket.addEventListener.mock.calls.find(
           call => call[0] === 'open'

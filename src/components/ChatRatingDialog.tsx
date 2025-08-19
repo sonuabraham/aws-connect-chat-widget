@@ -29,15 +29,15 @@ export const ChatRatingDialog: React.FC<ChatRatingDialogProps> = ({
 
   const handleSubmit = async () => {
     if (selectedRating === 0) return;
-    
+
     setIsSubmitting(true);
-    
+
     const rating: ChatRating = {
       score: selectedRating,
       comment: comment.trim() || undefined,
       timestamp: new Date(),
     };
-    
+
     try {
       await onSubmit(rating);
     } finally {
@@ -103,24 +103,27 @@ export const ChatRatingDialog: React.FC<ChatRatingDialogProps> = ({
             </svg>
           </button>
         </div>
-        
+
         <div className="chat-rating-dialog__content">
           <div className="chat-rating-dialog__message">
             <p className="chat-rating-dialog__primary-text">
-              How was your chat experience{agentName ? ` with ${agentName}` : ''}?
+              How was your chat experience
+              {agentName ? ` with ${agentName}` : ''}?
             </p>
             <p className="chat-rating-dialog__secondary-text">
               Your feedback helps us improve our service.
             </p>
           </div>
-          
+
           <div className="rating-section">
             <div className="rating-stars">
-              {[1, 2, 3, 4, 5].map((star) => (
+              {[1, 2, 3, 4, 5].map(star => (
                 <button
                   key={star}
                   className={`rating-star ${
-                    star <= (hoveredRating || selectedRating) ? 'rating-star--active' : ''
+                    star <= (hoveredRating || selectedRating)
+                      ? 'rating-star--active'
+                      : ''
                   }`}
                   onClick={() => setSelectedRating(star)}
                   onMouseEnter={() => setHoveredRating(star)}
@@ -131,7 +134,11 @@ export const ChatRatingDialog: React.FC<ChatRatingDialogProps> = ({
                   <svg width="32" height="32" viewBox="0 0 32 32">
                     <path
                       d="M16 2L20.18 10.52L30 12L23 19.48L24.36 30L16 25.54L7.64 30L9 19.48L2 12L11.82 10.52L16 2Z"
-                      fill={star <= (hoveredRating || selectedRating) ? 'currentColor' : 'none'}
+                      fill={
+                        star <= (hoveredRating || selectedRating)
+                          ? 'currentColor'
+                          : 'none'
+                      }
                       stroke="currentColor"
                       strokeWidth="1.5"
                     />
@@ -139,12 +146,12 @@ export const ChatRatingDialog: React.FC<ChatRatingDialogProps> = ({
                 </button>
               ))}
             </div>
-            
+
             <div className="rating-text">
               {getRatingText(hoveredRating || selectedRating)}
             </div>
           </div>
-          
+
           {selectedRating > 0 && (
             <div className="comment-section">
               <label htmlFor="rating-comment" className="comment-label">
@@ -154,18 +161,16 @@ export const ChatRatingDialog: React.FC<ChatRatingDialogProps> = ({
                 id="rating-comment"
                 className="comment-textarea"
                 value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                onChange={e => setComment(e.target.value)}
                 placeholder={getCommentPlaceholder(selectedRating)}
                 rows={3}
                 maxLength={500}
               />
-              <div className="comment-counter">
-                {comment.length}/500
-              </div>
+              <div className="comment-counter">{comment.length}/500</div>
             </div>
           )}
         </div>
-        
+
         <div className="chat-rating-dialog__actions">
           <button
             className="chat-rating-dialog__button chat-rating-dialog__button--secondary"

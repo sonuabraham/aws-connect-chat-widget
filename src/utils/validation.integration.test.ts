@@ -10,7 +10,7 @@ import {
   validateThemeConfiguration,
   validateAWSConnectConfiguration,
   validateMessageConfiguration,
-  validateFeatureConfiguration
+  validateFeatureConfiguration,
 } from './validation';
 
 describe('Configuration Validation Integration', () => {
@@ -20,42 +20,46 @@ describe('Configuration Validation Integration', () => {
         region: 'us-east-1',
         instanceId: '12345678-1234-1234-1234-123456789012',
         contactFlowId: '87654321-4321-4321-4321-210987654321',
-        apiGatewayEndpoint: 'https://api.example.com/connect'
+        apiGatewayEndpoint: 'https://api.example.com/connect',
       },
       ui: {
         theme: {
           primaryColor: '#007bff',
           secondaryColor: '#6c757d',
           fontFamily: 'Arial, sans-serif',
-          borderRadius: '8px'
+          borderRadius: '8px',
         },
         position: {
           bottom: '20px',
-          right: '20px'
+          right: '20px',
         },
         messages: {
           welcomeMessage: 'Welcome to our chat support!',
           offlineMessage: 'We are currently offline. Please leave a message.',
           waitingMessage: 'Please wait while we connect you to an agent...',
-          connectingMessage: 'Connecting to support...'
-        }
+          connectingMessage: 'Connecting to support...',
+        },
       },
       features: {
         fileUpload: true,
         emojiPicker: false,
         chatRatings: true,
         chatTranscript: true,
-        typing: true
-      }
+        typing: true,
+      },
     };
 
     const result = validateConfiguration(completeConfig);
     expect(result.isValid).toBe(true);
     expect(result.errors).toHaveLength(0);
-    
+
     // Test individual validators for warnings
-    const featuresResult = validateFeatureConfiguration(completeConfig.features);
-    expect(featuresResult.warnings.some(w => w.code === 'PERFORMANCE_IMPACT')).toBe(true);
+    const featuresResult = validateFeatureConfiguration(
+      completeConfig.features
+    );
+    expect(
+      featuresResult.warnings.some(w => w.code === 'PERFORMANCE_IMPACT')
+    ).toBe(true);
   });
 
   it('should validate individual configuration sections', () => {
@@ -64,27 +68,27 @@ describe('Configuration Validation Integration', () => {
         region: 'us-east-1',
         instanceId: '12345678-1234-1234-1234-123456789012',
         contactFlowId: '87654321-4321-4321-4321-210987654321',
-        apiGatewayEndpoint: 'https://api.example.com/connect'
+        apiGatewayEndpoint: 'https://api.example.com/connect',
       },
       ui: {
         theme: {
           primaryColor: '#007bff',
-          secondaryColor: '#6c757d'
+          secondaryColor: '#6c757d',
         },
         position: {
           bottom: '20px',
-          right: '20px'
+          right: '20px',
         },
         messages: {
           welcomeMessage: 'Welcome to our chat support!',
           offlineMessage: 'We are currently offline.',
-          waitingMessage: 'Please wait while we connect you...'
-        }
+          waitingMessage: 'Please wait while we connect you...',
+        },
       },
       features: {
         fileUpload: false,
-        chatRatings: true
-      }
+        chatRatings: true,
+      },
     };
 
     // Test individual section validators
@@ -114,7 +118,7 @@ describe('Configuration Validation Integration', () => {
       ui: {
         theme: {
           primaryColor: 'invalid-color',
-          secondaryColor: 'invalid-color'
+          secondaryColor: 'invalid-color',
         },
         position: {
           // Missing bottom, right, and left
@@ -123,22 +127,26 @@ describe('Configuration Validation Integration', () => {
           welcomeMessage: '', // Empty message
           offlineMessage: 'A'.repeat(600), // Too long
           // Missing waitingMessage
-        }
+        },
       },
       features: {
         fileUpload: 'yes', // Should be boolean
-        chatRatings: 1 // Should be boolean
-      }
+        chatRatings: 1, // Should be boolean
+      },
     };
 
     const result = validateConfiguration(problematicConfig);
     expect(result.isValid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(5);
-    
+
     // Should have errors for various validation issues
     expect(result.errors.some(e => e.code === 'INVALID_AWS_REGION')).toBe(true);
-    expect(result.errors.some(e => e.code === 'INVALID_INSTANCE_ID')).toBe(true);
-    expect(result.errors.some(e => e.code === 'REQUIRED_FIELD_MISSING')).toBe(true);
+    expect(result.errors.some(e => e.code === 'INVALID_INSTANCE_ID')).toBe(
+      true
+    );
+    expect(result.errors.some(e => e.code === 'REQUIRED_FIELD_MISSING')).toBe(
+      true
+    );
     expect(result.errors.some(e => e.code === 'INVALID_COLOR')).toBe(true);
     expect(result.errors.some(e => e.code === 'INVALID_FORMAT')).toBe(true);
   });
@@ -149,37 +157,49 @@ describe('Configuration Validation Integration', () => {
         region: 'us-east-1',
         instanceId: '12345678-1234-1234-1234-123456789012',
         contactFlowId: '87654321-4321-4321-4321-210987654321',
-        apiGatewayEndpoint: 'http://insecure-endpoint.com' // HTTP instead of HTTPS
+        apiGatewayEndpoint: 'http://insecure-endpoint.com', // HTTP instead of HTTPS
       },
       ui: {
         theme: {
           primaryColor: '#007bff',
-          secondaryColor: '#007bff' // Same as primary
+          secondaryColor: '#007bff', // Same as primary
         },
         position: {
           bottom: '20px',
           right: '20px',
-          left: '30px' // Both right and left specified
+          left: '30px', // Both right and left specified
         },
         messages: {
           welcomeMessage: 'Hi!', // Very short
           offlineMessage: 'We are currently offline.',
-          waitingMessage: 'Please wait while we connect you...'
-        }
-      }
+          waitingMessage: 'Please wait while we connect you...',
+        },
+      },
     };
 
     const result = validateConfiguration(configWithCommonMistakes);
     expect(result.isValid).toBe(true); // Should still be valid
-    
+
     // Test individual validators for specific warnings
-    const themeResult = validateThemeConfiguration(configWithCommonMistakes.ui.theme);
-    expect(themeResult.warnings.some(w => w.message.includes('same'))).toBe(true);
-    
-    const positionResult = validateWidgetPosition(configWithCommonMistakes.ui.position);
-    expect(positionResult.warnings.some(w => w.message.includes('precedence'))).toBe(true);
-    
-    const messagesResult = validateMessageConfiguration(configWithCommonMistakes.ui.messages);
-    expect(messagesResult.warnings.some(w => w.message.includes('very short'))).toBe(true);
+    const themeResult = validateThemeConfiguration(
+      configWithCommonMistakes.ui.theme
+    );
+    expect(themeResult.warnings.some(w => w.message.includes('same'))).toBe(
+      true
+    );
+
+    const positionResult = validateWidgetPosition(
+      configWithCommonMistakes.ui.position
+    );
+    expect(
+      positionResult.warnings.some(w => w.message.includes('precedence'))
+    ).toBe(true);
+
+    const messagesResult = validateMessageConfiguration(
+      configWithCommonMistakes.ui.messages
+    );
+    expect(
+      messagesResult.warnings.some(w => w.message.includes('very short'))
+    ).toBe(true);
   });
 });

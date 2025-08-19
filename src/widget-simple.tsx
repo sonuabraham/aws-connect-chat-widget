@@ -117,7 +117,8 @@ const DEFAULT_CONFIG: SimpleWidgetConfig = {
     theme: {
       primaryColor: '#007bff',
       secondaryColor: '#6c757d',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       borderRadius: '8px',
     },
     position: {
@@ -146,27 +147,53 @@ function convertConfig(simpleConfig: SimpleWidgetConfig): any {
     aws: simpleConfig.aws,
     ui: {
       theme: {
-        primaryColor: simpleConfig.ui?.theme?.primaryColor || DEFAULT_CONFIG.ui!.theme!.primaryColor,
-        secondaryColor: simpleConfig.ui?.theme?.secondaryColor || DEFAULT_CONFIG.ui!.theme!.secondaryColor,
-        fontFamily: simpleConfig.ui?.theme?.fontFamily || DEFAULT_CONFIG.ui!.theme!.fontFamily,
-        borderRadius: simpleConfig.ui?.theme?.borderRadius || DEFAULT_CONFIG.ui!.theme!.borderRadius,
+        primaryColor:
+          simpleConfig.ui?.theme?.primaryColor ||
+          DEFAULT_CONFIG.ui!.theme!.primaryColor,
+        secondaryColor:
+          simpleConfig.ui?.theme?.secondaryColor ||
+          DEFAULT_CONFIG.ui!.theme!.secondaryColor,
+        fontFamily:
+          simpleConfig.ui?.theme?.fontFamily ||
+          DEFAULT_CONFIG.ui!.theme!.fontFamily,
+        borderRadius:
+          simpleConfig.ui?.theme?.borderRadius ||
+          DEFAULT_CONFIG.ui!.theme!.borderRadius,
       },
       position: {
-        bottom: simpleConfig.ui?.position?.bottom || DEFAULT_CONFIG.ui!.position!.bottom,
-        right: simpleConfig.ui?.position?.right || DEFAULT_CONFIG.ui!.position!.right,
+        bottom:
+          simpleConfig.ui?.position?.bottom ||
+          DEFAULT_CONFIG.ui!.position!.bottom,
+        right:
+          simpleConfig.ui?.position?.right ||
+          DEFAULT_CONFIG.ui!.position!.right,
         left: simpleConfig.ui?.position?.left,
       },
       messages: {
-        welcomeMessage: simpleConfig.ui?.messages?.welcomeMessage || DEFAULT_CONFIG.ui!.messages!.welcomeMessage,
-        offlineMessage: simpleConfig.ui?.messages?.offlineMessage || DEFAULT_CONFIG.ui!.messages!.offlineMessage,
-        waitingMessage: simpleConfig.ui?.messages?.waitingMessage || DEFAULT_CONFIG.ui!.messages!.waitingMessage,
+        welcomeMessage:
+          simpleConfig.ui?.messages?.welcomeMessage ||
+          DEFAULT_CONFIG.ui!.messages!.welcomeMessage,
+        offlineMessage:
+          simpleConfig.ui?.messages?.offlineMessage ||
+          DEFAULT_CONFIG.ui!.messages!.offlineMessage,
+        waitingMessage:
+          simpleConfig.ui?.messages?.waitingMessage ||
+          DEFAULT_CONFIG.ui!.messages!.waitingMessage,
       },
     },
     features: {
-      fileUpload: simpleConfig.features?.fileUpload || DEFAULT_CONFIG.features!.fileUpload,
-      emojiPicker: simpleConfig.features?.emojiPicker || DEFAULT_CONFIG.features!.emojiPicker,
-      chatRatings: simpleConfig.features?.chatRatings || DEFAULT_CONFIG.features!.chatRatings,
-      chatTranscript: simpleConfig.features?.chatTranscript || DEFAULT_CONFIG.features!.chatTranscript,
+      fileUpload:
+        simpleConfig.features?.fileUpload ||
+        DEFAULT_CONFIG.features!.fileUpload,
+      emojiPicker:
+        simpleConfig.features?.emojiPicker ||
+        DEFAULT_CONFIG.features!.emojiPicker,
+      chatRatings:
+        simpleConfig.features?.chatRatings ||
+        DEFAULT_CONFIG.features!.chatRatings,
+      chatTranscript:
+        simpleConfig.features?.chatTranscript ||
+        DEFAULT_CONFIG.features!.chatTranscript,
     },
   };
 }
@@ -179,7 +206,11 @@ class WidgetInstanceImpl implements WidgetInstance {
   private container: HTMLElement | null = null;
   private config: SimpleWidgetConfig;
   private destroyed = false;
-  private eventListeners: Array<{ element: Element | Window | Document; event: string; handler: EventListener }> = [];
+  private eventListeners: Array<{
+    element: Element | Window | Document;
+    event: string;
+    handler: EventListener;
+  }> = [];
   private intervals: NodeJS.Timeout[] = [];
   private timeouts: NodeJS.Timeout[] = [];
   private connectService: any = null;
@@ -187,9 +218,13 @@ class WidgetInstanceImpl implements WidgetInstance {
 
   constructor(config: SimpleWidgetConfig) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    
+
     // Add cleanup on page unload
-    this.addEventListener(window, 'beforeunload', this.handlePageUnload.bind(this));
+    this.addEventListener(
+      window,
+      'beforeunload',
+      this.handlePageUnload.bind(this)
+    );
     this.addEventListener(window, 'pagehide', this.handlePageUnload.bind(this));
   }
 
@@ -295,7 +330,11 @@ class WidgetInstanceImpl implements WidgetInstance {
   /**
    * Add event listener with automatic cleanup tracking
    */
-  private addEventListener(element: Element | Window | Document, event: string, handler: EventListener): void {
+  private addEventListener(
+    element: Element | Window | Document,
+    event: string,
+    handler: EventListener
+  ): void {
     element.addEventListener(event, handler);
     this.eventListeners.push({ element, event, handler });
   }
@@ -422,12 +461,16 @@ class WidgetInstanceImpl implements WidgetInstance {
 
     // Check for excessive event listeners
     if (this.eventListeners.length > 50) {
-      console.warn(`⚠️ High number of event listeners (${this.eventListeners.length}). Possible memory leak.`);
+      console.warn(
+        `⚠️ High number of event listeners (${this.eventListeners.length}). Possible memory leak.`
+      );
     }
 
     // Check for excessive timers
     if (this.intervals.length + this.timeouts.length > 20) {
-      console.warn(`⚠️ High number of timers (${this.intervals.length + this.timeouts.length}). Possible memory leak.`);
+      console.warn(
+        `⚠️ High number of timers (${this.intervals.length + this.timeouts.length}). Possible memory leak.`
+      );
     }
 
     // Schedule next check
@@ -445,7 +488,7 @@ class WidgetInstanceImpl implements WidgetInstance {
           <ThemeProvider theme={fullConfig.ui.theme}>
             <ChatWidget
               config={fullConfig}
-              onError={(error) => console.error('Widget Error:', error)}
+              onError={error => console.error('Widget Error:', error)}
             />
           </ThemeProvider>
         </WidgetErrorBoundary>

@@ -6,7 +6,11 @@ import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { ThemeProvider } from './ThemeProvider';
 import type { ChatState } from '../types/chat';
-import type { ThemeConfiguration, PositionConfiguration, UIConfiguration } from '../types/widget';
+import type {
+  ThemeConfiguration,
+  PositionConfiguration,
+  UIConfiguration,
+} from '../types/widget';
 
 describe('UI Components', () => {
   const mockTheme: ThemeConfiguration = {
@@ -73,11 +77,7 @@ describe('UI Components', () => {
 
   it('should render MessageList without crashing', () => {
     const { container } = render(
-      <MessageList
-        messages={[]}
-        isTyping={false}
-        onScroll={() => {}}
-      />
+      <MessageList messages={[]} isTyping={false} onScroll={() => {}} />
     );
     expect(container).toBeTruthy();
   });

@@ -46,7 +46,8 @@ export class ConnectServiceFactory {
     }
 
     // Validate instance ID format (UUID)
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidPattern.test(config.instanceId)) {
       throw new Error('Invalid AWS Connect instance ID format');
     }

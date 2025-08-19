@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { 
-  ChatState, 
-  Message, 
-  AgentInfo, 
-  VisitorInfo, 
+import type {
+  ChatState,
+  Message,
+  AgentInfo,
+  VisitorInfo,
   ChatStatus,
-  ChatError 
+  ChatError,
 } from '../types/chat';
 import type { AgentStatusUpdate, ConnectionStatus } from '../types/aws-connect';
 import { ConnectService } from '../services/ConnectService';
@@ -33,14 +33,16 @@ export interface UseChatReturn {
   chatState: ChatState;
   isConnected: boolean;
   isLoading: boolean;
-  
+
   // Actions
-  initializeChat: (visitorInfo: Omit<VisitorInfo, 'sessionId'>) => Promise<void>;
+  initializeChat: (
+    visitorInfo: Omit<VisitorInfo, 'sessionId'>
+  ) => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
   endChat: () => Promise<void>;
   markMessagesAsRead: () => void;
   setTyping: (isTyping: boolean) => void;
-  
+
   // State management
   updateVisitorInfo: (info: Partial<VisitorInfo>) => void;
   clearChatHistory: () => void;
@@ -55,10 +57,10 @@ export interface UseChatReturn {
 export const useChat = (connectService?: ConnectService): UseChatReturn => {
   const [chatState, setChatState] = useState<ChatState>(initialChatState);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Use ref to maintain service instance across re-renders
   const serviceRef = useRef<ConnectService | null>(connectService || null);
-  
+
   // Derived state
   const isConnected = chatState.status === 'connected';
 
@@ -68,12 +70,12 @@ export const useChat = (connectService?: ConnectService): UseChatReturn => {
   const updateChatState = useCallback((updates: Partial<ChatState>) => {
     setChatState(prevState => {
       const newState = { ...prevState, ...updates };
-      
+
       // Persist state to localStorage for page refresh recovery
       if (newState.status !== 'closed') {
         ChatStorage.saveChatState(newState);
       }
-      
+
       return newState;
     });
   }, []);
@@ -82,148 +84,157 @@ export const useChat = (connectService?: ConnectService): UseChatReturn => {
    * Handle state transitions
    * Requirement 2.1, 2.2: Proper state management for chat lifecycle
    */
-  const transitionToStatus = useCallback((newStatus: ChatStatus, error?: ChatError) => {
-    updateChatState({ 
-      status: newStatus,
-      error: error || undefined,
-    });
-  }, [updateChatState]);
+  const transitionToStatus = useCallback(
+    (newStatus: ChatStatus, error?: ChatError) => {
+      updateChatState({
+        status: newStatus,
+        error: error || undefined,
+      });
+    },
+    [updateChatState]
+  );
 
   /**
    * Initialize chat session
    * Requirement 2.1: Establish connection to AWS Connect
    */
-  const initializeChat = useCallback(async (visitorInfo: Omit<VisitorInfo, 'sessionId'>) => {
-    if (!serviceRef.current) {
-      throw new Error('ConnectService not available');
-    }
-
-    setIsLoading(true);
-    transitionToStatus('initializing');
-
-    try {
-      // Generate or restore session ID
-      let sessionId = ChatStorage.loadSessionId();
-      if (!sessionId) {
-        sessionId = ChatStorage.generateSessionId();
+  const initializeChat = useCallback(
+    async (visitorInfo: Omit<VisitorInfo, 'sessionId'>) => {
+      if (!serviceRef.current) {
+        throw new Error('ConnectService not available');
       }
 
-      const fullVisitorInfo: VisitorInfo = {
-        ...visitorInfo,
-        sessionId,
-      };
+      setIsLoading(true);
+      transitionToStatus('initializing');
 
-      // Update visitor info in state
-      updateChatState({ visitor: fullVisitorInfo });
-      ChatStorage.saveVisitorInfo(fullVisitorInfo);
+      try {
+        // Generate or restore session ID
+        let sessionId = ChatStorage.loadSessionId();
+        if (!sessionId) {
+          sessionId = ChatStorage.generateSessionId();
+        }
 
-      // Transition to waiting state
-      transitionToStatus('waiting');
+        const fullVisitorInfo: VisitorInfo = {
+          ...visitorInfo,
+          sessionId,
+        };
 
-      // Initialize chat with AWS Connect
-      const session = await serviceRef.current.initializeChat({
-        displayName: fullVisitorInfo.name,
-        email: fullVisitorInfo.email,
-      });
+        // Update visitor info in state
+        updateChatState({ visitor: fullVisitorInfo });
+        ChatStorage.saveVisitorInfo(fullVisitorInfo);
 
-      // Update state with session info
-      updateChatState({ 
-        session,
-        status: 'connected',
-      });
+        // Transition to waiting state
+        transitionToStatus('waiting');
 
-    } catch (error) {
-      const chatError: ChatError = {
-        code: 'CONNECTION_LOST',
-        message: error instanceof Error ? error.message : 'Failed to initialize chat',
-        timestamp: new Date(),
-        recoverable: true,
-      };
-      
-      transitionToStatus('ended', chatError);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [transitionToStatus, updateChatState]);
+        // Initialize chat with AWS Connect
+        const session = await serviceRef.current.initializeChat({
+          displayName: fullVisitorInfo.name,
+          email: fullVisitorInfo.email,
+        });
+
+        // Update state with session info
+        updateChatState({
+          session,
+          status: 'connected',
+        });
+      } catch (error) {
+        const chatError: ChatError = {
+          code: 'CONNECTION_LOST',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to initialize chat',
+          timestamp: new Date(),
+          recoverable: true,
+        };
+
+        transitionToStatus('ended', chatError);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [transitionToStatus, updateChatState]
+  );
 
   /**
    * Send message to agent
    * Requirement 3.1: Send messages through ConnectService
    */
-  const sendMessage = useCallback(async (content: string) => {
-    if (!serviceRef.current || !isConnected) {
-      throw new Error('No active chat session');
-    }
-
-    // Create optimistic message
-    const message: Message = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-      content,
-      sender: 'visitor',
-      timestamp: new Date(),
-      status: 'sending',
-      type: 'text',
-    };
-
-    // Add message to state optimistically using functional update
-    setChatState(prevState => {
-      const newState = {
-        ...prevState,
-        messages: [...prevState.messages, message],
-      };
-      
-      // Persist state to localStorage for page refresh recovery
-      if (newState.status !== 'closed') {
-        ChatStorage.saveChatState(newState);
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!serviceRef.current || !isConnected) {
+        throw new Error('No active chat session');
       }
-      
-      return newState;
-    });
 
-    try {
-      await serviceRef.current.sendMessage(content);
-      
-      // Update message status to sent
+      // Create optimistic message
+      const message: Message = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        content,
+        sender: 'visitor',
+        timestamp: new Date(),
+        status: 'sending',
+        type: 'text',
+      };
+
+      // Add message to state optimistically using functional update
       setChatState(prevState => {
         const newState = {
           ...prevState,
-          messages: prevState.messages.map(msg => 
-            msg.id === message.id 
-              ? { ...msg, status: 'sent' as const }
-              : msg
-          ),
+          messages: [...prevState.messages, message],
         };
-        
+
         // Persist state to localStorage for page refresh recovery
         if (newState.status !== 'closed') {
           ChatStorage.saveChatState(newState);
         }
-        
+
         return newState;
       });
-    } catch (error) {
-      // Update message status to failed
-      setChatState(prevState => {
-        const newState = {
-          ...prevState,
-          messages: prevState.messages.map(msg => 
-            msg.id === message.id 
-              ? { ...msg, status: 'failed' as const }
-              : msg
-          ),
-        };
-        
-        // Persist state to localStorage for page refresh recovery
-        if (newState.status !== 'closed') {
-          ChatStorage.saveChatState(newState);
-        }
-        
-        return newState;
-      });
-      throw error;
-    }
-  }, [isConnected]);
+
+      try {
+        await serviceRef.current.sendMessage(content);
+
+        // Update message status to sent
+        setChatState(prevState => {
+          const newState = {
+            ...prevState,
+            messages: prevState.messages.map(msg =>
+              msg.id === message.id ? { ...msg, status: 'sent' as const } : msg
+            ),
+          };
+
+          // Persist state to localStorage for page refresh recovery
+          if (newState.status !== 'closed') {
+            ChatStorage.saveChatState(newState);
+          }
+
+          return newState;
+        });
+      } catch (error) {
+        // Update message status to failed
+        setChatState(prevState => {
+          const newState = {
+            ...prevState,
+            messages: prevState.messages.map(msg =>
+              msg.id === message.id
+                ? { ...msg, status: 'failed' as const }
+                : msg
+            ),
+          };
+
+          // Persist state to localStorage for page refresh recovery
+          if (newState.status !== 'closed') {
+            ChatStorage.saveChatState(newState);
+          }
+
+          return newState;
+        });
+        throw error;
+      }
+    },
+    [isConnected]
+  );
 
   /**
    * End chat session
@@ -235,17 +246,17 @@ export const useChat = (connectService?: ConnectService): UseChatReturn => {
     }
 
     setIsLoading(true);
-    
+
     try {
       await serviceRef.current.endChat();
-      
+
       // Save final chat history
       ChatStorage.saveChatHistory(chatState.messages);
-      
+
       // Clear active session data but keep visitor info
       ChatStorage.clearChatState();
       ChatStorage.clearSessionId();
-      
+
       // Reset to closed state
       updateChatState({
         status: 'ended',
@@ -254,7 +265,6 @@ export const useChat = (connectService?: ConnectService): UseChatReturn => {
         isTyping: false,
         error: undefined,
       });
-      
     } catch (error) {
       console.warn('Error ending chat:', error);
       // Still transition to ended state even if disconnect fails
@@ -278,25 +288,31 @@ export const useChat = (connectService?: ConnectService): UseChatReturn => {
    * Set typing indicator
    * Requirement 3.4: Handle typing indicators
    */
-  const setTyping = useCallback((isTyping: boolean) => {
-    if (serviceRef.current && isConnected) {
-      if (isTyping) {
-        serviceRef.current.handleUserTyping();
-      } else {
-        serviceRef.current.stopUserTyping();
+  const setTyping = useCallback(
+    (isTyping: boolean) => {
+      if (serviceRef.current && isConnected) {
+        if (isTyping) {
+          serviceRef.current.handleUserTyping();
+        } else {
+          serviceRef.current.stopUserTyping();
+        }
       }
-    }
-  }, [isConnected]);
+    },
+    [isConnected]
+  );
 
   /**
    * Update visitor information
    * Requirement 2.1: Manage visitor data
    */
-  const updateVisitorInfo = useCallback((info: Partial<VisitorInfo>) => {
-    const updatedVisitor = { ...chatState.visitor, ...info };
-    updateChatState({ visitor: updatedVisitor });
-    ChatStorage.saveVisitorInfo(updatedVisitor);
-  }, [chatState.visitor, updateChatState]);
+  const updateVisitorInfo = useCallback(
+    (info: Partial<VisitorInfo>) => {
+      const updatedVisitor = { ...chatState.visitor, ...info };
+      updateChatState({ visitor: updatedVisitor });
+      ChatStorage.saveVisitorInfo(updatedVisitor);
+    },
+    [chatState.visitor, updateChatState]
+  );
 
   /**
    * Clear chat history
@@ -313,13 +329,13 @@ export const useChat = (connectService?: ConnectService): UseChatReturn => {
   const restoreFromStorage = useCallback(() => {
     const savedState = ChatStorage.loadChatState();
     const savedVisitor = ChatStorage.loadVisitorInfo();
-    
+
     if (savedState || savedVisitor) {
       const restoredState: Partial<ChatState> = {
         ...savedState,
         visitor: savedVisitor || initialChatState.visitor,
       };
-      
+
       // Only restore if there was an active session
       if (ChatStorage.hasActiveSession()) {
         updateChatState(restoredState);
@@ -345,12 +361,12 @@ export const useChat = (connectService?: ConnectService): UseChatReturn => {
           messages: [...prevState.messages, message],
           unreadCount: prevState.unreadCount + 1,
         };
-        
+
         // Persist state to localStorage for page refresh recovery
         if (newState.status !== 'closed') {
           ChatStorage.saveChatState(newState);
         }
-        
+
         return newState;
       });
     };
@@ -365,7 +381,7 @@ export const useChat = (connectService?: ConnectService): UseChatReturn => {
         isTyping: status.isTyping,
       };
 
-      updateChatState({ 
+      updateChatState({
         agent: agentInfo,
         isTyping: status.isTyping,
       });
@@ -411,14 +427,14 @@ export const useChat = (connectService?: ConnectService): UseChatReturn => {
     chatState,
     isConnected,
     isLoading,
-    
+
     // Actions
     initializeChat,
     sendMessage,
     endChat,
     markMessagesAsRead,
     setTyping,
-    
+
     // State management
     updateVisitorInfo,
     clearChatHistory,

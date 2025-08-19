@@ -17,7 +17,10 @@ import type {
   WebSocketMessageType,
 } from '../types/aws-connect';
 import type { Message } from '../types/chat';
-import { WebSocketManager, type WebSocketMessageHandler } from './WebSocketManager';
+import {
+  WebSocketManager,
+  type WebSocketMessageHandler,
+} from './WebSocketManager';
 import { MessageQueue } from './MessageQueue';
 import { TypingIndicatorService } from './TypingIndicatorService';
 import { ErrorHandler } from './ErrorHandler';
@@ -28,20 +31,23 @@ import { NotificationService } from './NotificationService';
  * Handles chat session initialization, message sending/receiving, and connection management
  * Supports requirements 2.1, 2.2, 7.2, 7.4
  */
-export class ConnectService implements IConnectService, WebSocketMessageHandler {
+export class ConnectService
+  implements IConnectService, WebSocketMessageHandler
+{
   private client: ConnectParticipantClient;
   private session: ChatSession | null = null;
   private connectionToken: string | null = null;
   private participantToken: string | null = null;
   private messageCallbacks: ((message: Message) => void)[] = [];
   private agentStatusCallbacks: ((status: AgentStatusUpdate) => void)[] = [];
-  private connectionStatusCallbacks: ((status: ConnectionStatus) => void)[] = [];
-  
+  private connectionStatusCallbacks: ((status: ConnectionStatus) => void)[] =
+    [];
+
   // Real-time messaging services
   private webSocketManager: WebSocketManager;
   private messageQueue: MessageQueue;
   private typingIndicatorService: TypingIndicatorService;
-  
+
   // Error handling and notifications
   private errorHandler: ErrorHandler;
   private notificationService: NotificationService;
@@ -56,7 +62,7 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
     this.webSocketManager = new WebSocketManager();
     this.messageQueue = new MessageQueue();
     this.typingIndicatorService = new TypingIndicatorService();
-    
+
     // Initialize error handling and notifications
     this.errorHandler = new ErrorHandler();
     this.notificationService = new NotificationService();
@@ -70,20 +76,23 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
    * Requirement 2.1: Establish connection to AWS Connect
    * Requirement 2.4: Error handling with user-friendly messages
    */
-  async initializeChat(participantDetails: ParticipantDetails): Promise<ChatSession> {
+  async initializeChat(
+    participantDetails: ParticipantDetails
+  ): Promise<ChatSession> {
     try {
       this.notifyConnectionStatus('connecting');
 
       // In a real implementation, this would come from your backend API
       // that calls AWS Connect's StartChatContact API
       const startChatResponse = await this.startChatContact(participantDetails);
-      
+
       this.participantToken = startChatResponse.ParticipantToken;
 
       // Create participant connection
       const connectionResponse = await this.createParticipantConnection();
-      
-      this.connectionToken = connectionResponse.ConnectionCredentials.ConnectionToken;
+
+      this.connectionToken =
+        connectionResponse.ConnectionCredentials.ConnectionToken;
 
       // Create chat session object
       this.session = {
@@ -102,14 +111,18 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
       return this.session;
     } catch (error) {
       this.notifyConnectionStatus('failed');
-      
+
       // Handle initialization error with recovery
       await this.errorHandler.handleConnectionError(
-        error instanceof Error ? error : new Error('Unknown initialization error'),
+        error instanceof Error
+          ? error
+          : new Error('Unknown initialization error'),
         'chat initialization'
       );
-      
-      throw new Error(`Failed to initialize chat: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+      throw new Error(
+        `Failed to initialize chat: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -147,12 +160,14 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
           error instanceof Error ? error : new Error('Unknown send error'),
           content
         );
-        
+
         // Queue the message for retry
         this.messageQueue.enqueue(content);
         this.notificationService.showMessageStatus(false);
-        
-        throw new Error(`Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+        throw new Error(
+          `Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     } else {
       // Queue message for later delivery
@@ -177,10 +192,14 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
       });
 
       const response = await this.client.send(command);
-      
-      return (response.Transcript || []).map(this.convertConnectMessageToMessage);
+
+      return (response.Transcript || []).map(
+        this.convertConnectMessageToMessage
+      );
     } catch (error) {
-      throw new Error(`Failed to receive messages: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to receive messages: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -203,13 +222,17 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
     } catch (error) {
       // Handle disconnection error but still cleanup
       await this.errorHandler.handleError(
-        error instanceof Error ? error : new Error('Unknown disconnection error'),
+        error instanceof Error
+          ? error
+          : new Error('Unknown disconnection error'),
         'CONNECTION_LOST'
       );
-      
+
       // Still cleanup even if disconnect fails
       this.cleanup();
-      throw new Error(`Failed to end chat: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to end chat: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -276,19 +299,24 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
 
     try {
       const connectionResponse = await this.createParticipantConnection();
-      this.connectionToken = connectionResponse.ConnectionCredentials.ConnectionToken;
-      
+      this.connectionToken =
+        connectionResponse.ConnectionCredentials.ConnectionToken;
+
       if (this.session) {
         this.session.connectionToken = this.connectionToken;
       }
     } catch (error) {
       // Handle token refresh error
       await this.errorHandler.handleError(
-        error instanceof Error ? error : new Error('Unknown token refresh error'),
+        error instanceof Error
+          ? error
+          : new Error('Unknown token refresh error'),
         'AUTHENTICATION_FAILED'
       );
-      
-      throw new Error(`Failed to refresh connection token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+      throw new Error(
+        `Failed to refresh connection token: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -315,15 +343,13 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
     });
 
     const response = await this.client.send(command);
-    
+
     if (!response.ConnectionCredentials || !response.Websocket) {
       throw new Error('Invalid connection response from AWS Connect');
     }
 
     return response;
   }
-
-
 
   /**
    * Notify connection status change
@@ -423,7 +449,7 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
     this.webSocketManager.setMessageHandler(this);
 
     // Set up typing indicator events
-    this.typingIndicatorService.on('onTypingStart', (participantId) => {
+    this.typingIndicatorService.on('onTypingStart', participantId => {
       this.agentStatusCallbacks.forEach(callback => {
         callback({
           agentId: participantId,
@@ -433,7 +459,7 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
       });
     });
 
-    this.typingIndicatorService.on('onTypingStop', (participantId) => {
+    this.typingIndicatorService.on('onTypingStop', participantId => {
       this.agentStatusCallbacks.forEach(callback => {
         callback({
           agentId: participantId,
@@ -448,7 +474,7 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
     });
 
     // Set up message queue processing
-    this.messageQueue.startProcessing(async (content) => {
+    this.messageQueue.startProcessing(async content => {
       if (!this.connectionToken) {
         throw new Error('No active session');
       }
@@ -463,17 +489,17 @@ export class ConnectService implements IConnectService, WebSocketMessageHandler 
     });
 
     // Set up error handler events
-    this.errorHandler.on('onError', (error) => {
+    this.errorHandler.on('onError', error => {
       this.notificationService.showError(error);
     });
 
-    this.errorHandler.on('onConnectionStatusChange', (status) => {
+    this.errorHandler.on('onConnectionStatusChange', status => {
       this.notificationService.showConnectionStatus(status);
       this.notifyConnectionStatus(status);
     });
 
     // Set up message queue events
-    this.messageQueue.on('onMessageQueued', (message) => {
+    this.messageQueue.on('onMessageQueued', message => {
       this.notificationService.showQueueStatus(this.messageQueue.size());
     });
 

@@ -49,7 +49,10 @@ export class NotificationService {
   /**
    * Set event handlers
    */
-  on<K extends keyof NotificationEvents>(event: K, handler: NotificationEvents[K]): void {
+  on<K extends keyof NotificationEvents>(
+    event: K,
+    handler: NotificationEvents[K]
+  ): void {
     this.events[event] = handler;
   }
 
@@ -65,7 +68,7 @@ export class NotificationService {
    */
   showError(error: ChatError, actions?: NotificationAction[]): string {
     const userFriendlyMessage = this.getUserFriendlyErrorMessage(error);
-    
+
     return this.addNotification({
       type: 'error',
       title: 'Connection Issue',
@@ -114,11 +117,13 @@ export class NotificationService {
           title: 'Disconnected',
           message: 'You have been disconnected from the chat service',
           duration: 0,
-          actions: [{
-            label: 'Reconnect',
-            action: () => this.handleReconnectAction(),
-            style: 'primary',
-          }],
+          actions: [
+            {
+              label: 'Reconnect',
+              action: () => this.handleReconnectAction(),
+              style: 'primary',
+            },
+          ],
         });
 
       case 'failed':
@@ -127,11 +132,13 @@ export class NotificationService {
           title: 'Connection Failed',
           message: 'Unable to connect to chat service. Please try again later.',
           duration: 0,
-          actions: [{
-            label: 'Retry',
-            action: () => this.handleRetryAction(),
-            style: 'primary',
-          }],
+          actions: [
+            {
+              label: 'Retry',
+              action: () => this.handleRetryAction(),
+              style: 'primary',
+            },
+          ],
         });
 
       default:
@@ -147,14 +154,17 @@ export class NotificationService {
       return this.addNotification({
         type: 'success',
         title: 'Agent Connected',
-        message: agentName ? `${agentName} has joined the chat` : 'An agent has joined the chat',
+        message: agentName
+          ? `${agentName} has joined the chat`
+          : 'An agent has joined the chat',
         duration: 3000,
       });
     } else {
       return this.addNotification({
         type: 'warning',
         title: 'Agent Disconnected',
-        message: 'The agent has left the chat. You may need to wait for another agent.',
+        message:
+          'The agent has left the chat. You may need to wait for another agent.',
         duration: 5000,
       });
     }
@@ -165,20 +175,23 @@ export class NotificationService {
    */
   showMessageStatus(success: boolean, retryCount?: number): string | null {
     if (!success) {
-      const message = retryCount && retryCount > 1 
-        ? `Message failed to send after ${retryCount} attempts`
-        : 'Message failed to send';
+      const message =
+        retryCount && retryCount > 1
+          ? `Message failed to send after ${retryCount} attempts`
+          : 'Message failed to send';
 
       return this.addNotification({
         type: 'error',
         title: 'Message Not Sent',
         message,
         duration: 5000,
-        actions: [{
-          label: 'Retry',
-          action: () => this.handleRetryMessageAction(),
-          style: 'primary',
-        }],
+        actions: [
+          {
+            label: 'Retry',
+            action: () => this.handleRetryMessageAction(),
+            style: 'primary',
+          },
+        ],
       });
     }
     return null;
@@ -191,7 +204,8 @@ export class NotificationService {
     return this.addNotification({
       type: 'warning',
       title: 'Offline Mode',
-      message: 'You are currently offline. Messages will be sent when connection is restored.',
+      message:
+        'You are currently offline. Messages will be sent when connection is restored.',
       duration: 0,
     });
   }
@@ -214,7 +228,9 @@ export class NotificationService {
   /**
    * Add custom notification
    */
-  addNotification(notification: Omit<Notification, 'id' | 'timestamp'>): string {
+  addNotification(
+    notification: Omit<Notification, 'id' | 'timestamp'>
+  ): string {
     const id = this.generateNotificationId();
     const fullNotification: Notification = {
       ...notification,
@@ -252,7 +268,7 @@ export class NotificationService {
    */
   removeNotificationsByType(type: NotificationType): void {
     const toRemove: string[] = [];
-    
+
     this.notifications.forEach((notification, id) => {
       if (notification.type === type) {
         toRemove.push(id);
@@ -314,25 +330,25 @@ export class NotificationService {
   private getUserFriendlyErrorMessage(error: ChatError): string {
     switch (error.code) {
       case 'CONNECTION_LOST':
-        return 'Connection to chat service was lost. We\'re trying to reconnect automatically.';
-      
+        return "Connection to chat service was lost. We're trying to reconnect automatically.";
+
       case 'MESSAGE_SEND_FAILED':
-        return 'Your message couldn\'t be sent. We\'ll try again automatically.';
-      
+        return "Your message couldn't be sent. We'll try again automatically.";
+
       case 'AGENT_DISCONNECTED':
-        return 'The agent has disconnected. We\'re looking for another available agent.';
-      
+        return "The agent has disconnected. We're looking for another available agent.";
+
       case 'SESSION_TIMEOUT':
         return 'Your chat session has expired due to inactivity. Please start a new chat.';
-      
+
       case 'AUTHENTICATION_FAILED':
         return 'There was an authentication issue. Please refresh the page and try again.';
-      
+
       case 'RATE_LIMIT_EXCEEDED':
-        return 'You\'re sending messages too quickly. Please wait a moment before trying again.';
-      
+        return "You're sending messages too quickly. Please wait a moment before trying again.";
+
       default:
-        return 'An unexpected error occurred. We\'re working to resolve it.';
+        return "An unexpected error occurred. We're working to resolve it.";
     }
   }
 
@@ -351,7 +367,7 @@ export class NotificationService {
             style: 'primary',
           });
           break;
-        
+
         case 'MESSAGE_SEND_FAILED':
           actions.push({
             label: 'Retry Message',
@@ -359,7 +375,7 @@ export class NotificationService {
             style: 'primary',
           });
           break;
-        
+
         case 'AGENT_DISCONNECTED':
           actions.push({
             label: 'Find Agent',

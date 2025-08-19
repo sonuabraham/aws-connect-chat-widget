@@ -30,7 +30,10 @@ export class TypingIndicatorService {
   /**
    * Set event handlers
    */
-  on<K extends keyof TypingIndicatorEvents>(event: K, handler: TypingIndicatorEvents[K]): void {
+  on<K extends keyof TypingIndicatorEvents>(
+    event: K,
+    handler: TypingIndicatorEvents[K]
+  ): void {
     this.events[event] = handler;
   }
 
@@ -46,7 +49,7 @@ export class TypingIndicatorService {
    */
   handleTypingIndicator(participantId: string): void {
     const existing = this.typingParticipants.get(participantId);
-    
+
     if (existing) {
       // Clear existing timeout and create new one
       clearTimeout(existing.timeout);
@@ -73,7 +76,7 @@ export class TypingIndicatorService {
    */
   stopTyping(participantId: string): void {
     const participant = this.typingParticipants.get(participantId);
-    
+
     if (participant) {
       clearTimeout(participant.timeout);
       this.typingParticipants.delete(participantId);

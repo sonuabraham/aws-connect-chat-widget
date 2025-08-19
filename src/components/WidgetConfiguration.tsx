@@ -10,9 +10,12 @@ import type {
   AWSConnectConfig,
   UIConfiguration,
   FeatureConfiguration,
-  ValidationResult
+  ValidationResult,
 } from '../types';
-import { validateConfiguration, validateAWSConnectConfiguration } from '../utils/validation';
+import {
+  validateConfiguration,
+  validateAWSConnectConfiguration,
+} from '../utils/validation';
 
 interface WidgetConfigurationProps {
   config: WidgetConfig;
@@ -36,61 +39,78 @@ export const WidgetConfiguration: React.FC<WidgetConfigurationProps> = ({
   onSave,
   onCancel,
   isLoading = false,
-  className = ''
+  className = '',
 }) => {
-  const [activeTab, setActiveTab] = useState<'aws' | 'theme' | 'messages' | 'features'>('aws');
-  const [validationErrors, setValidationErrors] = useState<ConfigurationErrors>({});
-  const [validationWarnings, setValidationWarnings] = useState<ConfigurationErrors>({});
+  const [activeTab, setActiveTab] = useState<
+    'aws' | 'theme' | 'messages' | 'features'
+  >('aws');
+  const [validationErrors, setValidationErrors] = useState<ConfigurationErrors>(
+    {}
+  );
+  const [validationWarnings, setValidationWarnings] =
+    useState<ConfigurationErrors>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Validate configuration whenever it changes
   useEffect(() => {
     const result = validateConfiguration(config);
-    
+
     const errors: ConfigurationErrors = {};
     const warnings: ConfigurationErrors = {};
-    
+
     result.errors.forEach(error => {
       if (!errors[error.field]) {
         errors[error.field] = [];
       }
       errors[error.field].push(error.message);
     });
-    
+
     result.warnings.forEach(warning => {
       if (!warnings[warning.field]) {
         warnings[warning.field] = [];
       }
       warnings[warning.field].push(warning.message);
     });
-    
+
     setValidationErrors(errors);
     setValidationWarnings(warnings);
   }, [config]);
 
-  const handleConfigUpdate = useCallback((updates: Partial<WidgetConfig>) => {
-    const newConfig = { ...config, ...updates };
-    onConfigChange(newConfig);
-    setHasUnsavedChanges(true);
-  }, [config, onConfigChange]);
+  const handleConfigUpdate = useCallback(
+    (updates: Partial<WidgetConfig>) => {
+      const newConfig = { ...config, ...updates };
+      onConfigChange(newConfig);
+      setHasUnsavedChanges(true);
+    },
+    [config, onConfigChange]
+  );
 
-  const handleAWSConfigUpdate = useCallback((awsConfig: Partial<AWSConnectConfig>) => {
-    handleConfigUpdate({
-      aws: { ...config.aws, ...awsConfig }
-    });
-  }, [config.aws, handleConfigUpdate]);
+  const handleAWSConfigUpdate = useCallback(
+    (awsConfig: Partial<AWSConnectConfig>) => {
+      handleConfigUpdate({
+        aws: { ...config.aws, ...awsConfig },
+      });
+    },
+    [config.aws, handleConfigUpdate]
+  );
 
-  const handleUIConfigUpdate = useCallback((uiConfig: Partial<UIConfiguration>) => {
-    handleConfigUpdate({
-      ui: { ...config.ui, ...uiConfig }
-    });
-  }, [config.ui, handleConfigUpdate]);
+  const handleUIConfigUpdate = useCallback(
+    (uiConfig: Partial<UIConfiguration>) => {
+      handleConfigUpdate({
+        ui: { ...config.ui, ...uiConfig },
+      });
+    },
+    [config.ui, handleConfigUpdate]
+  );
 
-  const handleFeatureConfigUpdate = useCallback((features: Partial<FeatureConfiguration>) => {
-    handleConfigUpdate({
-      features: { ...config.features, ...features }
-    });
-  }, [config.features, handleConfigUpdate]);
+  const handleFeatureConfigUpdate = useCallback(
+    (features: Partial<FeatureConfiguration>) => {
+      handleConfigUpdate({
+        features: { ...config.features, ...features },
+      });
+    },
+    [config.features, handleConfigUpdate]
+  );
 
   const handleSave = useCallback(() => {
     const result = validateConfiguration(config);
@@ -140,8 +160,10 @@ export const WidgetConfiguration: React.FC<WidgetConfigurationProps> = ({
           onClick={() => setActiveTab('aws')}
         >
           AWS Connect
-          {validationErrors['aws.region'] || validationErrors['aws.instanceId'] || 
-           validationErrors['aws.contactFlowId'] || validationErrors['aws.apiGatewayEndpoint'] ? (
+          {validationErrors['aws.region'] ||
+          validationErrors['aws.instanceId'] ||
+          validationErrors['aws.contactFlowId'] ||
+          validationErrors['aws.apiGatewayEndpoint'] ? (
             <span className="error-indicator">!</span>
           ) : null}
         </button>
@@ -151,7 +173,8 @@ export const WidgetConfiguration: React.FC<WidgetConfigurationProps> = ({
           onClick={() => setActiveTab('theme')}
         >
           Theme & Appearance
-          {validationErrors['ui.theme.primaryColor'] || validationErrors['ui.theme.secondaryColor'] ? (
+          {validationErrors['ui.theme.primaryColor'] ||
+          validationErrors['ui.theme.secondaryColor'] ? (
             <span className="error-indicator">!</span>
           ) : null}
         </button>
@@ -161,7 +184,8 @@ export const WidgetConfiguration: React.FC<WidgetConfigurationProps> = ({
           onClick={() => setActiveTab('messages')}
         >
           Messages
-          {validationErrors['ui.messages.welcomeMessage'] || validationErrors['ui.messages.offlineMessage'] ? (
+          {validationErrors['ui.messages.welcomeMessage'] ||
+          validationErrors['ui.messages.offlineMessage'] ? (
             <span className="error-indicator">!</span>
           ) : null}
         </button>
@@ -183,7 +207,7 @@ export const WidgetConfiguration: React.FC<WidgetConfigurationProps> = ({
             warnings={validationWarnings}
           />
         )}
-        
+
         {activeTab === 'theme' && (
           <ThemeConfiguration
             config={config.ui}
@@ -192,16 +216,16 @@ export const WidgetConfiguration: React.FC<WidgetConfigurationProps> = ({
             warnings={validationWarnings}
           />
         )}
-        
+
         {activeTab === 'messages' && (
           <MessageConfiguration
             config={config.ui.messages}
-            onConfigChange={(messages) => handleUIConfigUpdate({ messages })}
+            onConfigChange={messages => handleUIConfigUpdate({ messages })}
             errors={validationErrors}
             warnings={validationWarnings}
           />
         )}
-        
+
         {activeTab === 'features' && (
           <FeatureConfiguration
             config={config.features}
@@ -229,7 +253,7 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
   config,
   onConfigChange,
   errors,
-  warnings
+  warnings,
 }) => {
   const handleInputChange = (field: keyof AWSConnectConfig, value: string) => {
     onConfigChange({ [field]: value });
@@ -239,7 +263,8 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
     <div className="aws-configuration">
       <h3>AWS Connect Settings</h3>
       <p className="section-description">
-        Configure your AWS Connect instance details to enable chat functionality.
+        Configure your AWS Connect instance details to enable chat
+        functionality.
       </p>
 
       <div className="form-group">
@@ -247,7 +272,7 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
         <select
           id="aws-region"
           value={config.region || ''}
-          onChange={(e) => handleInputChange('region', e.target.value)}
+          onChange={e => handleInputChange('region', e.target.value)}
           className={errors['aws.region'] ? 'error' : ''}
         >
           <option value="">Select a region</option>
@@ -263,7 +288,9 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
         {errors['aws.region'] && (
           <div className="field-errors">
             {errors['aws.region'].map((error, index) => (
-              <span key={index} className="error-message">{error}</span>
+              <span key={index} className="error-message">
+                {error}
+              </span>
             ))}
           </div>
         )}
@@ -275,7 +302,7 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
           type="text"
           id="aws-instance-id"
           value={config.instanceId || ''}
-          onChange={(e) => handleInputChange('instanceId', e.target.value)}
+          onChange={e => handleInputChange('instanceId', e.target.value)}
           placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
           className={errors['aws.instanceId'] ? 'error' : ''}
         />
@@ -285,7 +312,9 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
         {errors['aws.instanceId'] && (
           <div className="field-errors">
             {errors['aws.instanceId'].map((error, index) => (
-              <span key={index} className="error-message">{error}</span>
+              <span key={index} className="error-message">
+                {error}
+              </span>
             ))}
           </div>
         )}
@@ -297,7 +326,7 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
           type="text"
           id="aws-contact-flow-id"
           value={config.contactFlowId || ''}
-          onChange={(e) => handleInputChange('contactFlowId', e.target.value)}
+          onChange={e => handleInputChange('contactFlowId', e.target.value)}
           placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
           className={errors['aws.contactFlowId'] ? 'error' : ''}
         />
@@ -307,7 +336,9 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
         {errors['aws.contactFlowId'] && (
           <div className="field-errors">
             {errors['aws.contactFlowId'].map((error, index) => (
-              <span key={index} className="error-message">{error}</span>
+              <span key={index} className="error-message">
+                {error}
+              </span>
             ))}
           </div>
         )}
@@ -319,7 +350,9 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
           type="url"
           id="aws-api-gateway"
           value={config.apiGatewayEndpoint || ''}
-          onChange={(e) => handleInputChange('apiGatewayEndpoint', e.target.value)}
+          onChange={e =>
+            handleInputChange('apiGatewayEndpoint', e.target.value)
+          }
           placeholder="https://your-api-gateway-url.amazonaws.com"
           className={errors['aws.apiGatewayEndpoint'] ? 'error' : ''}
         />
@@ -329,7 +362,9 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
         {errors['aws.apiGatewayEndpoint'] && (
           <div className="field-errors">
             {errors['aws.apiGatewayEndpoint'].map((error, index) => (
-              <span key={index} className="error-message">{error}</span>
+              <span key={index} className="error-message">
+                {error}
+              </span>
             ))}
           </div>
         )}
@@ -349,7 +384,7 @@ const AWSConnectConfiguration: React.FC<AWSConnectConfigurationProps> = ({
   );
 };
 
-export default WidgetConfiguration;/**
+export default WidgetConfiguration; /**
 
  * Theme configuration section
  */
@@ -364,17 +399,17 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
   config,
   onConfigChange,
   errors,
-  warnings
+  warnings,
 }) => {
   const handleThemeChange = (field: string, value: string) => {
     onConfigChange({
-      theme: { ...config.theme, [field]: value }
+      theme: { ...config.theme, [field]: value },
     });
   };
 
   const handlePositionChange = (field: string, value: string) => {
     onConfigChange({
-      position: { ...config.position, [field]: value }
+      position: { ...config.position, [field]: value },
     });
   };
 
@@ -395,13 +430,17 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
                 type="color"
                 id="primary-color"
                 value={config.theme.primaryColor || '#007bff'}
-                onChange={(e) => handleThemeChange('primaryColor', e.target.value)}
+                onChange={e =>
+                  handleThemeChange('primaryColor', e.target.value)
+                }
                 className="color-picker"
               />
               <input
                 type="text"
                 value={config.theme.primaryColor || '#007bff'}
-                onChange={(e) => handleThemeChange('primaryColor', e.target.value)}
+                onChange={e =>
+                  handleThemeChange('primaryColor', e.target.value)
+                }
                 placeholder="#007bff"
                 className={`color-text ${errors['ui.theme.primaryColor'] ? 'error' : ''}`}
               />
@@ -412,7 +451,9 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
             {errors['ui.theme.primaryColor'] && (
               <div className="field-errors">
                 {errors['ui.theme.primaryColor'].map((error, index) => (
-                  <span key={index} className="error-message">{error}</span>
+                  <span key={index} className="error-message">
+                    {error}
+                  </span>
                 ))}
               </div>
             )}
@@ -425,13 +466,17 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
                 type="color"
                 id="secondary-color"
                 value={config.theme.secondaryColor || '#6c757d'}
-                onChange={(e) => handleThemeChange('secondaryColor', e.target.value)}
+                onChange={e =>
+                  handleThemeChange('secondaryColor', e.target.value)
+                }
                 className="color-picker"
               />
               <input
                 type="text"
                 value={config.theme.secondaryColor || '#6c757d'}
-                onChange={(e) => handleThemeChange('secondaryColor', e.target.value)}
+                onChange={e =>
+                  handleThemeChange('secondaryColor', e.target.value)
+                }
                 placeholder="#6c757d"
                 className={`color-text ${errors['ui.theme.secondaryColor'] ? 'error' : ''}`}
               />
@@ -442,7 +487,9 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
             {errors['ui.theme.secondaryColor'] && (
               <div className="field-errors">
                 {errors['ui.theme.secondaryColor'].map((error, index) => (
-                  <span key={index} className="error-message">{error}</span>
+                  <span key={index} className="error-message">
+                    {error}
+                  </span>
                 ))}
               </div>
             )}
@@ -458,7 +505,7 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
             type="text"
             id="font-family"
             value={config.theme.fontFamily || ''}
-            onChange={(e) => handleThemeChange('fontFamily', e.target.value)}
+            onChange={e => handleThemeChange('fontFamily', e.target.value)}
             placeholder="Arial, sans-serif"
             className={errors['ui.theme.fontFamily'] ? 'error' : ''}
           />
@@ -468,7 +515,9 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
           {errors['ui.theme.fontFamily'] && (
             <div className="field-errors">
               {errors['ui.theme.fontFamily'].map((error, index) => (
-                <span key={index} className="error-message">{error}</span>
+                <span key={index} className="error-message">
+                  {error}
+                </span>
               ))}
             </div>
           )}
@@ -483,7 +532,7 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
             type="text"
             id="border-radius"
             value={config.theme.borderRadius || ''}
-            onChange={(e) => handleThemeChange('borderRadius', e.target.value)}
+            onChange={e => handleThemeChange('borderRadius', e.target.value)}
             placeholder="8px"
             className={errors['ui.theme.borderRadius'] ? 'error' : ''}
           />
@@ -493,7 +542,9 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
           {errors['ui.theme.borderRadius'] && (
             <div className="field-errors">
               {errors['ui.theme.borderRadius'].map((error, index) => (
-                <span key={index} className="error-message">{error}</span>
+                <span key={index} className="error-message">
+                  {error}
+                </span>
               ))}
             </div>
           )}
@@ -509,17 +560,17 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
               type="text"
               id="position-bottom"
               value={config.position.bottom || ''}
-              onChange={(e) => handlePositionChange('bottom', e.target.value)}
+              onChange={e => handlePositionChange('bottom', e.target.value)}
               placeholder="20px"
               className={errors['ui.position.bottom'] ? 'error' : ''}
             />
-            <small className="field-help">
-              Distance from bottom of screen
-            </small>
+            <small className="field-help">Distance from bottom of screen</small>
             {errors['ui.position.bottom'] && (
               <div className="field-errors">
                 {errors['ui.position.bottom'].map((error, index) => (
-                  <span key={index} className="error-message">{error}</span>
+                  <span key={index} className="error-message">
+                    {error}
+                  </span>
                 ))}
               </div>
             )}
@@ -531,7 +582,7 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
               type="text"
               id="position-right"
               value={config.position.right || ''}
-              onChange={(e) => handlePositionChange('right', e.target.value)}
+              onChange={e => handlePositionChange('right', e.target.value)}
               placeholder="20px"
               className={errors['ui.position.right'] ? 'error' : ''}
             />
@@ -541,7 +592,9 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
             {errors['ui.position.right'] && (
               <div className="field-errors">
                 {errors['ui.position.right'].map((error, index) => (
-                  <span key={index} className="error-message">{error}</span>
+                  <span key={index} className="error-message">
+                    {error}
+                  </span>
                 ))}
               </div>
             )}
@@ -553,7 +606,7 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
               type="text"
               id="position-left"
               value={config.position.left || ''}
-              onChange={(e) => handlePositionChange('left', e.target.value)}
+              onChange={e => handlePositionChange('left', e.target.value)}
               placeholder="20px"
               className={errors['ui.position.left'] ? 'error' : ''}
             />
@@ -563,13 +616,15 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
             {errors['ui.position.left'] && (
               <div className="field-errors">
                 {errors['ui.position.left'].map((error, index) => (
-                  <span key={index} className="error-message">{error}</span>
+                  <span key={index} className="error-message">
+                    {error}
+                  </span>
                 ))}
               </div>
             )}
           </div>
         </div>
-        
+
         {warnings['ui.position'] && (
           <div className="field-warnings">
             {warnings['ui.position'].map((warning, index) => (
@@ -584,22 +639,23 @@ const ThemeConfiguration: React.FC<ThemeConfigurationProps> = ({
 
       <div className="theme-preview">
         <h4>Preview</h4>
-        <div 
+        <div
           className="widget-preview"
-          style={{
-            '--primary-color': config.theme.primaryColor,
-            '--secondary-color': config.theme.secondaryColor,
-            '--font-family': config.theme.fontFamily,
-            '--border-radius': config.theme.borderRadius
-          } as React.CSSProperties}
+          style={
+            {
+              '--primary-color': config.theme.primaryColor,
+              '--secondary-color': config.theme.secondaryColor,
+              '--font-family': config.theme.fontFamily,
+              '--border-radius': config.theme.borderRadius,
+            } as React.CSSProperties
+          }
         >
-          <div className="preview-button">
-            Chat with us
-          </div>
+          <div className="preview-button">Chat with us</div>
           <div className="preview-window">
             <div className="preview-header">Customer Support</div>
             <div className="preview-message">
-              {config.messages.welcomeMessage || 'Welcome! How can we help you today?'}
+              {config.messages.welcomeMessage ||
+                'Welcome! How can we help you today?'}
             </div>
           </div>
         </div>
@@ -622,9 +678,12 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
   config,
   onConfigChange,
   errors,
-  warnings
+  warnings,
 }) => {
-  const handleMessageChange = (field: keyof UIConfiguration['messages'], value: string) => {
+  const handleMessageChange = (
+    field: keyof UIConfiguration['messages'],
+    value: string
+  ) => {
     onConfigChange({ [field]: value });
   };
 
@@ -640,7 +699,7 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
         <textarea
           id="welcome-message"
           value={config.welcomeMessage || ''}
-          onChange={(e) => handleMessageChange('welcomeMessage', e.target.value)}
+          onChange={e => handleMessageChange('welcomeMessage', e.target.value)}
           placeholder="Welcome! How can we help you today?"
           rows={3}
           maxLength={500}
@@ -655,7 +714,9 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
         {errors['ui.messages.welcomeMessage'] && (
           <div className="field-errors">
             {errors['ui.messages.welcomeMessage'].map((error, index) => (
-              <span key={index} className="error-message">{error}</span>
+              <span key={index} className="error-message">
+                {error}
+              </span>
             ))}
           </div>
         )}
@@ -666,7 +727,7 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
         <textarea
           id="offline-message"
           value={config.offlineMessage || ''}
-          onChange={(e) => handleMessageChange('offlineMessage', e.target.value)}
+          onChange={e => handleMessageChange('offlineMessage', e.target.value)}
           placeholder="We're currently offline. Please leave a message and we'll get back to you."
           rows={3}
           maxLength={500}
@@ -681,7 +742,9 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
         {errors['ui.messages.offlineMessage'] && (
           <div className="field-errors">
             {errors['ui.messages.offlineMessage'].map((error, index) => (
-              <span key={index} className="error-message">{error}</span>
+              <span key={index} className="error-message">
+                {error}
+              </span>
             ))}
           </div>
         )}
@@ -692,7 +755,7 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
         <textarea
           id="waiting-message"
           value={config.waitingMessage || ''}
-          onChange={(e) => handleMessageChange('waitingMessage', e.target.value)}
+          onChange={e => handleMessageChange('waitingMessage', e.target.value)}
           placeholder="Please wait while we connect you to an agent..."
           rows={2}
           maxLength={500}
@@ -707,7 +770,9 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
         {errors['ui.messages.waitingMessage'] && (
           <div className="field-errors">
             {errors['ui.messages.waitingMessage'].map((error, index) => (
-              <span key={index} className="error-message">{error}</span>
+              <span key={index} className="error-message">
+                {error}
+              </span>
             ))}
           </div>
         )}
@@ -718,7 +783,9 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
         <textarea
           id="connecting-message"
           value={config.connectingMessage || ''}
-          onChange={(e) => handleMessageChange('connectingMessage', e.target.value)}
+          onChange={e =>
+            handleMessageChange('connectingMessage', e.target.value)
+          }
           placeholder="Connecting to AWS Connect..."
           rows={2}
           maxLength={500}
@@ -733,7 +800,9 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
         {errors['ui.messages.connectingMessage'] && (
           <div className="field-errors">
             {errors['ui.messages.connectingMessage'].map((error, index) => (
-              <span key={index} className="error-message">{error}</span>
+              <span key={index} className="error-message">
+                {error}
+              </span>
             ))}
           </div>
         )}
@@ -743,7 +812,7 @@ const MessageConfiguration: React.FC<MessageConfigurationProps> = ({
         <div className="field-warnings">
           {Object.entries(warnings)
             .filter(([key]) => key.startsWith('ui.messages'))
-            .map(([key, warningList]) => 
+            .map(([key, warningList]) =>
               warningList.map((warning, index) => (
                 <div key={`${key}-${index}`} className="warning-message">
                   <span className="warning-icon">⚠️</span>
@@ -771,9 +840,12 @@ const FeatureConfiguration: React.FC<FeatureConfigurationProps> = ({
   config,
   onConfigChange,
   errors,
-  warnings
+  warnings,
 }) => {
-  const handleFeatureToggle = (feature: keyof FeatureConfiguration, enabled: boolean) => {
+  const handleFeatureToggle = (
+    feature: keyof FeatureConfiguration,
+    enabled: boolean
+  ) => {
     onConfigChange({ [feature]: enabled });
   };
 
@@ -782,28 +854,29 @@ const FeatureConfiguration: React.FC<FeatureConfigurationProps> = ({
       key: 'fileUpload' as const,
       label: 'File Upload',
       description: 'Allow visitors to upload files during chat',
-      warning: 'May impact performance and requires additional security considerations'
+      warning:
+        'May impact performance and requires additional security considerations',
     },
     {
       key: 'emojiPicker' as const,
       label: 'Emoji Picker',
-      description: 'Enable emoji picker in message input'
+      description: 'Enable emoji picker in message input',
     },
     {
       key: 'chatRatings' as const,
       label: 'Chat Ratings',
-      description: 'Allow visitors to rate their chat experience'
+      description: 'Allow visitors to rate their chat experience',
     },
     {
       key: 'chatTranscript' as const,
       label: 'Chat Transcript',
-      description: 'Provide chat transcript download option'
+      description: 'Provide chat transcript download option',
     },
     {
       key: 'typing' as const,
       label: 'Typing Indicators',
-      description: 'Show typing indicators for both visitor and agent'
-    }
+      description: 'Show typing indicators for both visitor and agent',
+    },
   ];
 
   return (
@@ -814,14 +887,16 @@ const FeatureConfiguration: React.FC<FeatureConfigurationProps> = ({
       </p>
 
       <div className="feature-list">
-        {features.map((feature) => (
+        {features.map(feature => (
           <div key={feature.key} className="feature-item">
             <div className="feature-toggle">
               <label className="toggle-switch">
                 <input
                   type="checkbox"
                   checked={config[feature.key] || false}
-                  onChange={(e) => handleFeatureToggle(feature.key, e.target.checked)}
+                  onChange={e =>
+                    handleFeatureToggle(feature.key, e.target.checked)
+                  }
                 />
                 <span className="toggle-slider"></span>
               </label>
@@ -838,7 +913,9 @@ const FeatureConfiguration: React.FC<FeatureConfigurationProps> = ({
               {errors[`features.${feature.key}`] && (
                 <div className="field-errors">
                   {errors[`features.${feature.key}`].map((error, index) => (
-                    <span key={index} className="error-message">{error}</span>
+                    <span key={index} className="error-message">
+                      {error}
+                    </span>
                   ))}
                 </div>
               )}

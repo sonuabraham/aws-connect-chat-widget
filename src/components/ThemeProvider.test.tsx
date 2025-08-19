@@ -7,14 +7,14 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { vi } from 'vitest';
-import { 
-  ThemeProvider, 
-  useTheme, 
-  useResponsive, 
-  useHighContrast, 
+import {
+  ThemeProvider,
+  useTheme,
+  useResponsive,
+  useHighContrast,
   useReducedMotion,
   defaultTheme,
-  withTheme
+  withTheme,
 } from './ThemeProvider';
 import type { ThemeConfiguration } from '../types';
 
@@ -69,7 +69,9 @@ const ReducedMotionTestComponent: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
   return (
     <div data-testid="reduced-motion-component">
-      <span data-testid="reduced-motion-value">{prefersReducedMotion.toString()}</span>
+      <span data-testid="reduced-motion-value">
+        {prefersReducedMotion.toString()}
+      </span>
     </div>
   );
 };
@@ -85,7 +87,7 @@ describe('ThemeProvider', () => {
   beforeEach(() => {
     // Reset document head
     document.head.innerHTML = '';
-    
+
     // Mock matchMedia
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -105,15 +107,21 @@ describe('ThemeProvider', () => {
         </ThemeProvider>
       );
 
-      expect(screen.getByTestId('primary-color')).toHaveTextContent(defaultTheme.primaryColor);
-      expect(screen.getByTestId('font-family')).toHaveTextContent(defaultTheme.fontFamily);
-      expect(screen.getByTestId('border-radius')).toHaveTextContent(defaultTheme.borderRadius);
+      expect(screen.getByTestId('primary-color')).toHaveTextContent(
+        defaultTheme.primaryColor
+      );
+      expect(screen.getByTestId('font-family')).toHaveTextContent(
+        defaultTheme.fontFamily
+      );
+      expect(screen.getByTestId('border-radius')).toHaveTextContent(
+        defaultTheme.borderRadius
+      );
     });
 
     it('merges custom theme with default theme', () => {
       const customTheme: Partial<ThemeConfiguration> = {
         primaryColor: '#ff0000',
-        secondaryColor: '#00ff00'
+        secondaryColor: '#00ff00',
       };
 
       render(
@@ -124,12 +132,14 @@ describe('ThemeProvider', () => {
 
       expect(screen.getByTestId('primary-color')).toHaveTextContent('#ff0000');
       // Should still have default font family
-      expect(screen.getByTestId('font-family')).toHaveTextContent(defaultTheme.fontFamily);
+      expect(screen.getByTestId('font-family')).toHaveTextContent(
+        defaultTheme.fontFamily
+      );
     });
 
     it('applies CSS custom properties to the DOM', () => {
       const customTheme: Partial<ThemeConfiguration> = {
-        primaryColor: '#ff0000'
+        primaryColor: '#ff0000',
       };
 
       render(
@@ -139,12 +149,14 @@ describe('ThemeProvider', () => {
       );
 
       const rootStyle = document.documentElement.style;
-      expect(rootStyle.getPropertyValue('--chat-primary-color')).toBe('#ff0000');
+      expect(rootStyle.getPropertyValue('--chat-primary-color')).toBe(
+        '#ff0000'
+      );
     });
 
     it('removes CSS custom properties on unmount', () => {
       const customTheme: Partial<ThemeConfiguration> = {
-        primaryColor: '#ff0000'
+        primaryColor: '#ff0000',
       };
 
       const { unmount } = render(
@@ -154,12 +166,16 @@ describe('ThemeProvider', () => {
       );
 
       // Properties should be set
-      expect(document.documentElement.style.getPropertyValue('--chat-primary-color')).toBe('#ff0000');
+      expect(
+        document.documentElement.style.getPropertyValue('--chat-primary-color')
+      ).toBe('#ff0000');
 
       unmount();
 
       // Properties should be removed
-      expect(document.documentElement.style.getPropertyValue('--chat-primary-color')).toBe('');
+      expect(
+        document.documentElement.style.getPropertyValue('--chat-primary-color')
+      ).toBe('');
     });
 
     it('applies className to the provider wrapper', () => {
@@ -169,7 +185,9 @@ describe('ThemeProvider', () => {
         </ThemeProvider>
       );
 
-      expect(document.querySelector('.chat-theme-provider.custom-theme-class')).toBeInTheDocument();
+      expect(
+        document.querySelector('.chat-theme-provider.custom-theme-class')
+      ).toBeInTheDocument();
     });
   });
 
@@ -183,7 +201,9 @@ describe('ThemeProvider', () => {
             <span data-testid="text-on-primary">{theme.textOnPrimary}</span>
             <span data-testid="success-color">{theme.successColor}</span>
             <span data-testid="spacing-md">{theme.spacing.md}</span>
-            <span data-testid="font-size-sm">{theme.typography.fontSize.sm}</span>
+            <span data-testid="font-size-sm">
+              {theme.typography.fontSize.sm}
+            </span>
           </div>
         );
       };
@@ -194,8 +214,12 @@ describe('ThemeProvider', () => {
         </ThemeProvider>
       );
 
-      expect(screen.getByTestId('primary-rgb')).toHaveTextContent('0, 123, 255');
-      expect(screen.getByTestId('text-on-primary')).toHaveTextContent('#ffffff');
+      expect(screen.getByTestId('primary-rgb')).toHaveTextContent(
+        '0, 123, 255'
+      );
+      expect(screen.getByTestId('text-on-primary')).toHaveTextContent(
+        '#ffffff'
+      );
       expect(screen.getByTestId('success-color')).toHaveTextContent('#28a745');
       expect(screen.getByTestId('spacing-md')).toHaveTextContent('16px');
       expect(screen.getByTestId('font-size-sm')).toHaveTextContent('14px');
@@ -219,15 +243,21 @@ describe('ThemeProvider', () => {
       );
 
       // Should be darker versions of the primary color
-      expect(screen.getByTestId('primary-hover')).not.toHaveTextContent('#007bff');
-      expect(screen.getByTestId('primary-active')).not.toHaveTextContent('#007bff');
+      expect(screen.getByTestId('primary-hover')).not.toHaveTextContent(
+        '#007bff'
+      );
+      expect(screen.getByTestId('primary-active')).not.toHaveTextContent(
+        '#007bff'
+      );
     });
   });
 
   describe('useTheme Hook', () => {
     it('throws error when used outside ThemeProvider', () => {
       // Suppress console.error for this test
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       expect(() => {
         render(<TestComponent />);
@@ -239,14 +269,14 @@ describe('ThemeProvider', () => {
     it('returns extended theme object', () => {
       const TestThemePropsComponent: React.FC = () => {
         const theme = useTheme();
-        
+
         // Test that extended properties exist
         expect(theme).toHaveProperty('primaryColorRgb');
         expect(theme).toHaveProperty('spacing');
         expect(theme).toHaveProperty('typography');
         expect(theme).toHaveProperty('breakpoints');
         expect(theme).toHaveProperty('animation');
-        
+
         return <div data-testid="theme-props-test">Theme props exist</div>;
       };
 
@@ -268,17 +298,23 @@ describe('ThemeProvider', () => {
         </ThemeProvider>
       );
 
-      expect(screen.getByTestId('mobile-query')).toHaveTextContent('@media (max-width: 768px)');
-      expect(screen.getByTestId('tablet-query')).toHaveTextContent('@media (max-width: 1024px)');
-      expect(screen.getByTestId('desktop-query')).toHaveTextContent('@media (min-width: 1200px)');
+      expect(screen.getByTestId('mobile-query')).toHaveTextContent(
+        '@media (max-width: 768px)'
+      );
+      expect(screen.getByTestId('tablet-query')).toHaveTextContent(
+        '@media (max-width: 1024px)'
+      );
+      expect(screen.getByTestId('desktop-query')).toHaveTextContent(
+        '@media (min-width: 1200px)'
+      );
     });
 
     it('provides media query functions', () => {
       const TestResponsiveFunctionsComponent: React.FC = () => {
         const responsive = useResponsive();
-        
+
         // Mock window.matchMedia for testing
-        window.matchMedia = vi.fn().mockImplementation((query) => ({
+        window.matchMedia = vi.fn().mockImplementation(query => ({
           matches: query.includes('max-width: 768px'),
           media: query,
           onchange: null,
@@ -291,9 +327,15 @@ describe('ThemeProvider', () => {
 
         return (
           <div>
-            <span data-testid="is-mobile">{responsive.isMobile().toString()}</span>
-            <span data-testid="is-tablet">{responsive.isTablet().toString()}</span>
-            <span data-testid="is-desktop">{responsive.isDesktop().toString()}</span>
+            <span data-testid="is-mobile">
+              {responsive.isMobile().toString()}
+            </span>
+            <span data-testid="is-tablet">
+              {responsive.isTablet().toString()}
+            </span>
+            <span data-testid="is-desktop">
+              {responsive.isDesktop().toString()}
+            </span>
           </div>
         );
       };
@@ -312,7 +354,7 @@ describe('ThemeProvider', () => {
 
   describe('useHighContrast Hook', () => {
     it('detects high contrast preference', () => {
-      window.matchMedia = vi.fn().mockImplementation((query) => {
+      window.matchMedia = vi.fn().mockImplementation(query => {
         if (query === '(prefers-contrast: high)') {
           return mockMatchMedia(true);
         }
@@ -321,13 +363,15 @@ describe('ThemeProvider', () => {
 
       render(<HighContrastTestComponent />);
 
-      expect(screen.getByTestId('high-contrast-value')).toHaveTextContent('true');
+      expect(screen.getByTestId('high-contrast-value')).toHaveTextContent(
+        'true'
+      );
     });
 
     it('updates when high contrast preference changes', () => {
       let mediaQueryCallback: ((e: MediaQueryListEvent) => void) | null = null;
-      
-      window.matchMedia = vi.fn().mockImplementation((query) => {
+
+      window.matchMedia = vi.fn().mockImplementation(query => {
         if (query === '(prefers-contrast: high)') {
           return {
             ...mockMatchMedia(false),
@@ -336,7 +380,7 @@ describe('ThemeProvider', () => {
                 mediaQueryCallback = callback;
               }
             }),
-            removeEventListener: vi.fn()
+            removeEventListener: vi.fn(),
           };
         }
         return mockMatchMedia(false);
@@ -344,7 +388,9 @@ describe('ThemeProvider', () => {
 
       render(<HighContrastTestComponent />);
 
-      expect(screen.getByTestId('high-contrast-value')).toHaveTextContent('false');
+      expect(screen.getByTestId('high-contrast-value')).toHaveTextContent(
+        'false'
+      );
 
       // Simulate media query change
       if (mediaQueryCallback) {
@@ -353,13 +399,15 @@ describe('ThemeProvider', () => {
         });
       }
 
-      expect(screen.getByTestId('high-contrast-value')).toHaveTextContent('true');
+      expect(screen.getByTestId('high-contrast-value')).toHaveTextContent(
+        'true'
+      );
     });
   });
 
   describe('useReducedMotion Hook', () => {
     it('detects reduced motion preference', () => {
-      window.matchMedia = vi.fn().mockImplementation((query) => {
+      window.matchMedia = vi.fn().mockImplementation(query => {
         if (query === '(prefers-reduced-motion: reduce)') {
           return mockMatchMedia(true);
         }
@@ -368,13 +416,15 @@ describe('ThemeProvider', () => {
 
       render(<ReducedMotionTestComponent />);
 
-      expect(screen.getByTestId('reduced-motion-value')).toHaveTextContent('true');
+      expect(screen.getByTestId('reduced-motion-value')).toHaveTextContent(
+        'true'
+      );
     });
 
     it('updates when reduced motion preference changes', () => {
       let mediaQueryCallback: ((e: MediaQueryListEvent) => void) | null = null;
-      
-      window.matchMedia = vi.fn().mockImplementation((query) => {
+
+      window.matchMedia = vi.fn().mockImplementation(query => {
         if (query === '(prefers-reduced-motion: reduce)') {
           return {
             ...mockMatchMedia(false),
@@ -383,7 +433,7 @@ describe('ThemeProvider', () => {
                 mediaQueryCallback = callback;
               }
             }),
-            removeEventListener: vi.fn()
+            removeEventListener: vi.fn(),
           };
         }
         return mockMatchMedia(false);
@@ -391,7 +441,9 @@ describe('ThemeProvider', () => {
 
       render(<ReducedMotionTestComponent />);
 
-      expect(screen.getByTestId('reduced-motion-value')).toHaveTextContent('false');
+      expect(screen.getByTestId('reduced-motion-value')).toHaveTextContent(
+        'false'
+      );
 
       // Simulate media query change
       if (mediaQueryCallback) {
@@ -400,7 +452,9 @@ describe('ThemeProvider', () => {
         });
       }
 
-      expect(screen.getByTestId('reduced-motion-value')).toHaveTextContent('true');
+      expect(screen.getByTestId('reduced-motion-value')).toHaveTextContent(
+        'true'
+      );
     });
   });
 
@@ -412,20 +466,22 @@ describe('ThemeProvider', () => {
         </ThemeProvider>
       );
 
-      expect(screen.getByTestId('hoc-primary-color')).toHaveTextContent('#ff0000');
+      expect(screen.getByTestId('hoc-primary-color')).toHaveTextContent(
+        '#ff0000'
+      );
     });
 
     it('sets correct display name', () => {
       const TestComponent = () => <div>Test</div>;
       TestComponent.displayName = 'TestComponent';
-      
+
       const WrappedComponent = withTheme(TestComponent);
       expect(WrappedComponent.displayName).toBe('withTheme(TestComponent)');
     });
 
     it('uses component name when displayName is not available', () => {
       const TestComponent = () => <div>Test</div>;
-      
+
       const WrappedComponent = withTheme(TestComponent);
       expect(WrappedComponent.displayName).toBe('withTheme(TestComponent)');
     });
@@ -457,7 +513,9 @@ describe('ThemeProvider', () => {
         </ThemeProvider>
       );
 
-      expect(document.documentElement.style.getPropertyValue('--chat-primary-color')).toBe('#ff0000');
+      expect(
+        document.documentElement.style.getPropertyValue('--chat-primary-color')
+      ).toBe('#ff0000');
 
       rerender(
         <ThemeProvider theme={{ primaryColor: '#00ff00' }}>
@@ -465,7 +523,9 @@ describe('ThemeProvider', () => {
         </ThemeProvider>
       );
 
-      expect(document.documentElement.style.getPropertyValue('--chat-primary-color')).toBe('#00ff00');
+      expect(
+        document.documentElement.style.getPropertyValue('--chat-primary-color')
+      ).toBe('#00ff00');
     });
   });
 

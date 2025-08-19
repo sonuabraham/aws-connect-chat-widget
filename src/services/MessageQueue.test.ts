@@ -18,7 +18,7 @@ describe('MessageQueue', () => {
   describe('basic queue operations', () => {
     it('should enqueue messages', () => {
       const messageId = messageQueue.enqueue('Hello');
-      
+
       expect(messageId).toBeTruthy();
       expect(messageQueue.size()).toBe(1);
       expect(messageQueue.isEmpty()).toBe(false);
@@ -27,7 +27,7 @@ describe('MessageQueue', () => {
     it('should dequeue messages by ID', () => {
       const messageId = messageQueue.enqueue('Hello');
       const message = messageQueue.dequeue(messageId);
-      
+
       expect(message).toBeTruthy();
       expect(message?.content).toBe('Hello');
       expect(messageQueue.size()).toBe(0);
@@ -35,7 +35,7 @@ describe('MessageQueue', () => {
 
     it('should return null for non-existent message ID', () => {
       const message = messageQueue.dequeue('non-existent');
-      
+
       expect(message).toBeNull();
     });
 
@@ -43,7 +43,7 @@ describe('MessageQueue', () => {
       messageQueue.enqueue('Message 1');
       messageQueue.enqueue('Message 2');
       messageQueue.clear();
-      
+
       expect(messageQueue.size()).toBe(0);
       expect(messageQueue.isEmpty()).toBe(true);
     });
@@ -55,7 +55,7 @@ describe('MessageQueue', () => {
       for (let i = 0; i < 15; i++) {
         messageQueue.enqueue(`Message ${i}`);
       }
-      
+
       expect(messageQueue.size()).toBe(10);
     });
 
@@ -67,7 +67,7 @@ describe('MessageQueue', () => {
       for (let i = 0; i < 12; i++) {
         messageQueue.enqueue(`Message ${i}`);
       }
-      
+
       expect(onMessageFailed).toHaveBeenCalledTimes(2);
     });
   });
@@ -84,16 +84,16 @@ describe('MessageQueue', () => {
     it('should process messages successfully', async () => {
       const onMessageSent = vi.fn();
       messageQueue.on('onMessageSent', onMessageSent);
-      
+
       mockSendFunction.mockResolvedValue(undefined);
-      
+
       const messageId = messageQueue.enqueue('Hello');
       messageQueue.startProcessing(mockSendFunction);
-      
+
       // Advance timer to trigger processing
       vi.advanceTimersByTime(2000);
       await vi.runAllTimersAsync();
-      
+
       expect(mockSendFunction).toHaveBeenCalledWith('Hello');
       expect(onMessageSent).toHaveBeenCalledWith(messageId);
       expect(messageQueue.size()).toBe(0);
@@ -103,18 +103,18 @@ describe('MessageQueue', () => {
       mockSendFunction
         .mockRejectedValueOnce(new Error('Network error'))
         .mockResolvedValueOnce(undefined);
-      
+
       messageQueue.enqueue('Hello');
       messageQueue.startProcessing(mockSendFunction);
-      
+
       // First attempt fails
       vi.advanceTimersByTime(2000);
       await vi.runAllTimersAsync();
-      
+
       // Second attempt succeeds
       vi.advanceTimersByTime(2000);
       await vi.runAllTimersAsync();
-      
+
       expect(mockSendFunction).toHaveBeenCalledTimes(2);
       expect(messageQueue.size()).toBe(0);
     });
@@ -122,19 +122,22 @@ describe('MessageQueue', () => {
     it('should remove messages after max retries', async () => {
       const onMessageFailed = vi.fn();
       messageQueue.on('onMessageFailed', onMessageFailed);
-      
+
       mockSendFunction.mockRejectedValue(new Error('Network error'));
-      
+
       const messageId = messageQueue.enqueue('Hello', 2); // Max 2 retries
       messageQueue.startProcessing(mockSendFunction);
-      
+
       // Process through all retry attempts
       for (let i = 0; i < 3; i++) {
         vi.advanceTimersByTime(2000);
         await vi.runAllTimersAsync();
       }
-      
-      expect(onMessageFailed).toHaveBeenCalledWith(messageId, expect.any(Error));
+
+      expect(onMessageFailed).toHaveBeenCalledWith(
+        messageId,
+        expect.any(Error)
+      );
       expect(messageQueue.size()).toBe(0);
     });
 
@@ -142,9 +145,9 @@ describe('MessageQueue', () => {
       messageQueue.enqueue('Hello');
       messageQueue.startProcessing(mockSendFunction);
       messageQueue.stopProcessing();
-      
+
       vi.advanceTimersByTime(2000);
-      
+
       expect(mockSendFunction).not.toHaveBeenCalled();
     });
   });
@@ -153,18 +156,18 @@ describe('MessageQueue', () => {
     it('should trigger onQueueEmpty when queue becomes empty', () => {
       const onQueueEmpty = vi.fn();
       messageQueue.on('onQueueEmpty', onQueueEmpty);
-      
+
       messageQueue.clear();
-      
+
       expect(onQueueEmpty).toHaveBeenCalled();
     });
 
     it('should trigger onMessageQueued when message is added', () => {
       const onMessageQueued = vi.fn();
       messageQueue.on('onMessageQueued', onMessageQueued);
-      
+
       messageQueue.enqueue('Hello');
-      
+
       expect(onMessageQueued).toHaveBeenCalledWith(
         expect.objectContaining({
           content: 'Hello',
@@ -177,9 +180,9 @@ describe('MessageQueue', () => {
       const onQueueEmpty = vi.fn();
       messageQueue.on('onQueueEmpty', onQueueEmpty);
       messageQueue.off('onQueueEmpty');
-      
+
       messageQueue.clear();
-      
+
       expect(onQueueEmpty).not.toHaveBeenCalled();
     });
   });
@@ -188,15 +191,15 @@ describe('MessageQueue', () => {
     it('should categorize failed messages', () => {
       const messageId1 = messageQueue.enqueue('Message 1', 1);
       const messageId2 = messageQueue.enqueue('Message 2', 1);
-      
+
       // Simulate failed messages
       const messages = messageQueue.getQueuedMessages();
       messages[0].retryCount = 2; // Exceeds maxRetries
       messages[1].retryCount = 0; // Still pending
-      
+
       const failedMessages = messageQueue.getFailedMessages();
       const pendingMessages = messageQueue.getPendingMessages();
-      
+
       expect(failedMessages).toHaveLength(1);
       expect(pendingMessages).toHaveLength(1);
     });
@@ -205,9 +208,9 @@ describe('MessageQueue', () => {
       const messageId = messageQueue.enqueue('Hello', 1);
       const messages = messageQueue.getQueuedMessages();
       messages[0].retryCount = 2; // Mark as failed
-      
+
       messageQueue.retryFailedMessages();
-      
+
       expect(messages[0].retryCount).toBe(0);
     });
   });
@@ -216,13 +219,13 @@ describe('MessageQueue', () => {
     it('should provide queue statistics', () => {
       const messageId1 = messageQueue.enqueue('Message 1', 1);
       const messageId2 = messageQueue.enqueue('Message 2', 1);
-      
+
       // Simulate one failed message
       const messages = messageQueue.getQueuedMessages();
       messages[0].retryCount = 2;
-      
+
       const stats = messageQueue.getStats();
-      
+
       expect(stats.total).toBe(2);
       expect(stats.pending).toBe(1);
       expect(stats.failed).toBe(1);
@@ -231,7 +234,7 @@ describe('MessageQueue', () => {
 
     it('should handle empty queue statistics', () => {
       const stats = messageQueue.getStats();
-      
+
       expect(stats.total).toBe(0);
       expect(stats.pending).toBe(0);
       expect(stats.failed).toBe(0);

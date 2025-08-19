@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { WebSocketManager, type WebSocketMessageHandler } from './WebSocketManager';
+import {
+  WebSocketManager,
+  type WebSocketMessageHandler,
+} from './WebSocketManager';
 import type { ConnectionStatus } from '../types/aws-connect';
 import type { Message } from '../types/chat';
 
@@ -29,7 +32,7 @@ describe('WebSocketManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     webSocketManager = new WebSocketManager();
-    
+
     mockHandler = {
       onMessage: vi.fn(),
       onTyping: vi.fn(),
@@ -47,10 +50,10 @@ describe('WebSocketManager', () => {
   describe('connection management', () => {
     it('should connect to WebSocket successfully', async () => {
       const connectPromise = webSocketManager.connect('wss://example.com');
-      
+
       // Simulate WebSocket open event
       mockWebSocket.onopen();
-      
+
       await expect(connectPromise).resolves.toBeUndefined();
       expect(webSocketManager.isConnected()).toBe(true);
       expect(webSocketManager.getState()).toBe('connected');
@@ -58,17 +61,19 @@ describe('WebSocketManager', () => {
 
     it('should handle connection errors', async () => {
       const connectPromise = webSocketManager.connect('wss://example.com');
-      
+
       // Simulate WebSocket error
       mockWebSocket.onerror(new Error('Connection failed'));
-      
-      await expect(connectPromise).rejects.toThrow('WebSocket connection failed');
+
+      await expect(connectPromise).rejects.toThrow(
+        'WebSocket connection failed'
+      );
       expect(webSocketManager.getState()).toBe('failed');
     });
 
     it('should disconnect properly', () => {
       webSocketManager.disconnect();
-      
+
       expect(mockWebSocket.close).toHaveBeenCalledWith(1000, 'Normal closure');
       expect(webSocketManager.getState()).toBe('disconnected');
     });
@@ -83,14 +88,14 @@ describe('WebSocketManager', () => {
 
     it('should send messages when connected', () => {
       webSocketManager.sendMessage('Hello');
-      
+
       expect(mockWebSocket.send).toHaveBeenCalledWith('Hello');
     });
 
     it('should queue messages when disconnected', () => {
       webSocketManager.disconnect();
       webSocketManager.sendMessage('Hello');
-      
+
       expect(webSocketManager.getQueuedMessageCount()).toBe(1);
     });
 
@@ -140,7 +145,9 @@ describe('WebSocketManager', () => {
       webSocketManager.sendTypingIndicator();
 
       expect(mockWebSocket.send).toHaveBeenCalledWith(
-        expect.stringContaining('application/vnd.amazonaws.connect.event.typing')
+        expect.stringContaining(
+          'application/vnd.amazonaws.connect.event.typing'
+        )
       );
     });
   });
@@ -163,7 +170,9 @@ describe('WebSocketManager', () => {
       mockWebSocket.onclose({ code: 1006 });
 
       expect(webSocketManager.getState()).toBe('reconnecting');
-      expect(mockHandler.onConnectionStatusChange).toHaveBeenCalledWith('reconnecting');
+      expect(mockHandler.onConnectionStatusChange).toHaveBeenCalledWith(
+        'reconnecting'
+      );
     });
 
     it('should not reconnect on normal close', async () => {
@@ -182,9 +191,9 @@ describe('WebSocketManager', () => {
     it('should queue messages when offline', () => {
       // Simulate offline
       Object.defineProperty(navigator, 'onLine', { value: false });
-      
+
       webSocketManager.sendMessage('Hello');
-      
+
       expect(webSocketManager.getQueuedMessageCount()).toBe(1);
     });
 
@@ -196,7 +205,7 @@ describe('WebSocketManager', () => {
       // Simulate going offline then online
       Object.defineProperty(navigator, 'onLine', { value: false });
       webSocketManager.sendMessage('Hello');
-      
+
       Object.defineProperty(navigator, 'onLine', { value: true });
       window.dispatchEvent(new Event('online'));
 
@@ -218,7 +227,7 @@ describe('WebSocketManager', () => {
     it('should clear message queue', () => {
       webSocketManager.sendMessage('Hello');
       webSocketManager.clearMessageQueue();
-      
+
       expect(webSocketManager.getQueuedMessageCount()).toBe(0);
     });
   });

@@ -1,5 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { ChatWidget } from '../components/ChatWidget';
@@ -72,7 +78,7 @@ describe('Accessibility and Performance E2E Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    
+
     // Reset WebSocket mock
     Object.assign(mockWebSocket, {
       send: vi.fn(),
@@ -91,12 +97,12 @@ describe('Accessibility and Performance E2E Tests', () => {
   describe('Comprehensive Accessibility Testing', () => {
     it('should provide complete keyboard navigation support', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Test keyboard access to chat button
       const chatButton = screen.getByRole('button', { name: 'Open chat' });
-      
+
       // Focus with Tab
       chatButton.focus();
       expect(chatButton).toHaveFocus();
@@ -119,7 +125,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
       // Type message with keyboard
       await user.type(messageInput, 'Keyboard navigation test');
-      
+
       // Send with Enter
       fireEvent.keyDown(messageInput, { key: 'Enter' });
       expect(messageInput).toHaveValue('');
@@ -146,7 +152,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
     it('should provide comprehensive screen reader support', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Test ARIA labels and roles
@@ -176,7 +182,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
       // Test status updates
       await user.type(messageInput, 'Screen reader test');
-      
+
       // Simulate typing indicator
       act(() => {
         const mockTypingEvent = {
@@ -204,7 +210,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
     it('should support high contrast and color accessibility', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       // Mock high contrast mode
       window.matchMedia = vi.fn().mockImplementation(query => ({
         matches: query.includes('prefers-contrast: high'),
@@ -250,7 +256,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
     it('should support reduced motion preferences', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       // Mock reduced motion preference
       window.matchMedia = vi.fn().mockImplementation(query => ({
         matches: query.includes('prefers-reduced-motion: reduce'),
@@ -279,7 +285,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
     it('should handle focus management correctly', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Initial focus should not be trapped
@@ -322,11 +328,13 @@ describe('Accessibility and Performance E2E Tests', () => {
   describe('Performance Testing', () => {
     it('should load and initialize quickly', async () => {
       const startTime = performance.now();
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Widget should render immediately
-      expect(screen.getByRole('button', { name: 'Open chat' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Open chat' })
+      ).toBeInTheDocument();
 
       const endTime = performance.now();
       const loadTime = endTime - startTime;
@@ -337,7 +345,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
     it('should handle large message volumes efficiently', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       await user.click(screen.getByRole('button', { name: 'Open chat' }));
@@ -384,7 +392,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
     it('should optimize memory usage during long sessions', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       await user.click(screen.getByRole('button', { name: 'Open chat' }));
@@ -441,7 +449,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
     it('should handle rapid user interactions smoothly', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       const chatButton = screen.getByRole('button', { name: 'Open chat' });
@@ -475,7 +483,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
     it('should optimize network usage', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       await user.click(screen.getByRole('button', { name: 'Open chat' }));
@@ -519,7 +527,7 @@ describe('Accessibility and Performance E2E Tests', () => {
     it('should maintain accessibility during error states', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       const onError = vi.fn();
-      
+
       render(<ChatWidget config={mockConfig} onError={onError} />);
 
       await user.click(screen.getByRole('button', { name: 'Open chat' }));
@@ -555,7 +563,7 @@ describe('Accessibility and Performance E2E Tests', () => {
 
     it('should handle performance degradation gracefully', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       // Mock slow performance
       const originalSetTimeout = global.setTimeout;
       global.setTimeout = vi.fn((callback, delay) => {
@@ -567,9 +575,12 @@ describe('Accessibility and Performance E2E Tests', () => {
       await user.click(screen.getByRole('button', { name: 'Open chat' }));
 
       // Should still open, just slower
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('dialog')).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
 
       const messageInput = screen.getByLabelText('Type your message');
       await user.type(messageInput, 'Slow performance test');

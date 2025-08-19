@@ -17,7 +17,11 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   onError,
 }) => {
   // Initialize hooks
-  const { connectService, initialize: initializeConnect, connectionStatus } = useConnect();
+  const {
+    connectService,
+    initialize: initializeConnect,
+    connectionStatus,
+  } = useConnect();
   const {
     chatState,
     initializeChat,
@@ -109,26 +113,34 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
    * Handle message sending
    * Requirements: 3.1 - Wire MessageInput to ConnectService for sending messages
    */
-  const handleSendMessage = useCallback(async (content: string) => {
-    try {
-      await sendMessage(content);
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      onError?.({
-        code: 'NETWORK_ERROR',
-        message: 'Failed to send message',
-        details: { error: error instanceof Error ? error.message : 'Unknown error' },
-      });
-    }
-  }, [sendMessage, onError]);
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      try {
+        await sendMessage(content);
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        onError?.({
+          code: 'NETWORK_ERROR',
+          message: 'Failed to send message',
+          details: {
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+      }
+    },
+    [sendMessage, onError]
+  );
 
   /**
    * Handle typing indicator
    * Requirements: 3.4 - Integrate typing indicators between components and services
    */
-  const handleTyping = useCallback((isTyping: boolean) => {
-    setTyping(isTyping);
-  }, [setTyping]);
+  const handleTyping = useCallback(
+    (isTyping: boolean) => {
+      setTyping(isTyping);
+    },
+    [setTyping]
+  );
 
   /**
    * Handle chat initialization when widget opens

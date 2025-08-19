@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
         lib: {
           entry: resolve(__dirname, 'src/widget-simple.tsx'),
           name: 'AWSConnectChatWidget',
-          fileName: (format) => `aws-connect-chat-widget.${format}.js`,
+          fileName: format => `aws-connect-chat-widget.${format}.js`,
           formats: ['umd', 'es'],
         },
         rollupOptions: {

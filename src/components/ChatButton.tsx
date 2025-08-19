@@ -39,21 +39,21 @@ export const ChatButton: React.FC<ChatButtonProps> = ({
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily: theme.fontFamily,
-      outline: 'none'
+      outline: 'none',
     },
     states: {
       hover: {
         backgroundColor: theme.primaryColorHover,
         transform: 'translateY(-2px)',
-        boxShadow: theme.shadowLarge
+        boxShadow: theme.shadowLarge,
       },
       focus: {
-        boxShadow: `${theme.shadowMedium}, 0 0 0 2px ${theme.primaryColor}`
+        boxShadow: `${theme.shadowMedium}, 0 0 0 2px ${theme.primaryColor}`,
       },
       active: {
         backgroundColor: theme.primaryColorActive,
-        transform: 'translateY(0)'
-      }
+        transform: 'translateY(0)',
+      },
     },
     responsive: {
       mobile: {
@@ -61,9 +61,9 @@ export const ChatButton: React.FC<ChatButtonProps> = ({
         height: '50px',
         bottom: theme.spacing.md,
         right: position.right ? theme.spacing.md : undefined,
-        left: position.left ? theme.spacing.md : undefined
-      }
-    }
+        left: position.left ? theme.spacing.md : undefined,
+      },
+    },
   };
 
   const styledButtonClass = useStyles(buttonStyles, theme);

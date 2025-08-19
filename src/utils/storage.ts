@@ -43,7 +43,7 @@ export class ChatStorage {
       if (!serializedState) return null;
 
       const state = JSON.parse(serializedState);
-      
+
       // Convert ISO strings back to Date objects
       if (state.messages) {
         state.messages = state.messages.map((msg: any) => ({
@@ -146,10 +146,12 @@ export class ChatStorage {
    */
   static saveChatHistory(messages: any[]): void {
     try {
-      const serializedHistory = JSON.stringify(messages.map(msg => ({
-        ...msg,
-        timestamp: msg.timestamp.toISOString(),
-      })));
+      const serializedHistory = JSON.stringify(
+        messages.map(msg => ({
+          ...msg,
+          timestamp: msg.timestamp.toISOString(),
+        }))
+      );
       localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, serializedHistory);
     } catch (error) {
       console.warn('Failed to save chat history:', error);

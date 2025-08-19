@@ -1,15 +1,20 @@
-import type { 
-  WebSocketMessageType, 
-  ConnectMessageEvent, 
+import type {
+  WebSocketMessageType,
+  ConnectMessageEvent,
   ConnectTypingEvent,
-  ConnectionStatus 
+  ConnectionStatus,
 } from '../types/aws-connect';
 import type { Message } from '../types/chat';
 
 /**
  * WebSocket connection states
  */
-export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
+export type WebSocketState =
+  | 'disconnected'
+  | 'connecting'
+  | 'connected'
+  | 'reconnecting'
+  | 'failed';
 
 /**
  * WebSocket message handler interface
@@ -71,15 +76,15 @@ export class WebSocketManager {
           resolve();
         };
 
-        this.websocket.onmessage = (event) => {
+        this.websocket.onmessage = event => {
           this.handleMessage(event);
         };
 
-        this.websocket.onclose = (event) => {
+        this.websocket.onclose = event => {
           this.handleClose(event);
         };
 
-        this.websocket.onerror = (error) => {
+        this.websocket.onerror = error => {
           console.error('WebSocket error:', error);
           this.setState('failed');
           reject(new Error('WebSocket connection failed'));
@@ -92,7 +97,6 @@ export class WebSocketManager {
             reject(new Error('WebSocket connection timeout'));
           }
         }, 10000); // 10 second timeout
-
       } catch (error) {
         this.setState('failed');
         reject(error);
@@ -106,12 +110,12 @@ export class WebSocketManager {
   disconnect(): void {
     this.stopHeartbeat();
     this.clearReconnectTimeout();
-    
+
     if (this.websocket) {
       this.websocket.close(1000, 'Normal closure');
       this.websocket = null;
     }
-    
+
     this.setState('disconnected');
   }
 
@@ -181,7 +185,7 @@ export class WebSocketManager {
     this.disconnect();
     this.clearMessageQueue();
     this.messageHandler = null;
-    
+
     window.removeEventListener('online', this.handleOnline.bind(this));
     window.removeEventListener('offline', this.handleOffline.bind(this));
   }
@@ -240,12 +244,14 @@ export class WebSocketManager {
   private handleIncomingEvent(eventData: any): void {
     if (!this.messageHandler) return;
 
-    if (eventData.ContentType === 'application/vnd.amazonaws.connect.event.typing') {
+    if (
+      eventData.ContentType === 'application/vnd.amazonaws.connect.event.typing'
+    ) {
       const typingEvent = eventData as ConnectTypingEvent;
       const isTyping = true; // AWS Connect sends typing events when typing starts
-      
+
       this.messageHandler.onTyping(isTyping, typingEvent.ParticipantId);
-      
+
       // Auto-clear typing indicator after 3 seconds
       setTimeout(() => {
         this.messageHandler?.onTyping(false, typingEvent.ParticipantId);
@@ -258,7 +264,7 @@ export class WebSocketManager {
    */
   private handleClose(event: CloseEvent): void {
     this.stopHeartbeat();
-    
+
     if (event.code === 1000) {
       // Normal closure
       this.setState('disconnected');
@@ -281,7 +287,7 @@ export class WebSocketManager {
 
     this.setState('reconnecting');
     this.messageHandler?.onConnectionStatusChange('reconnecting');
-    
+
     this.reconnectAttempts++;
     const delay = Math.min(
       this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1),
@@ -347,13 +353,19 @@ export class WebSocketManager {
    */
   private setState(state: WebSocketState): void {
     this.state = state;
-    
+
     // Map WebSocket state to connection status
-    const connectionStatus: ConnectionStatus = state === 'connected' ? 'connected' :
-                                             state === 'connecting' ? 'connecting' :
-                                             state === 'reconnecting' ? 'reconnecting' :
-                                             state === 'failed' ? 'failed' : 'disconnected';
-    
+    const connectionStatus: ConnectionStatus =
+      state === 'connected'
+        ? 'connected'
+        : state === 'connecting'
+          ? 'connecting'
+          : state === 'reconnecting'
+            ? 'reconnecting'
+            : state === 'failed'
+              ? 'failed'
+              : 'disconnected';
+
     this.messageHandler?.onConnectionStatusChange(connectionStatus);
   }
 
@@ -363,7 +375,7 @@ export class WebSocketManager {
    */
   private queueMessage(message: string): void {
     this.messageQueue.push(message);
-    
+
     // Limit queue size to prevent memory issues
     if (this.messageQueue.length > 100) {
       this.messageQueue.shift(); // Remove oldest message
@@ -397,7 +409,7 @@ export class WebSocketManager {
    */
   private handleOnline(): void {
     this.isOnline = true;
-    
+
     if (this.state === 'disconnected' && this.websocketUrl) {
       this.attemptReconnection();
     } else if (this.isConnected()) {

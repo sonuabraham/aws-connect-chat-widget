@@ -9,20 +9,20 @@ import { ConnectService } from '../services/ConnectService';
 export interface UseConnectReturn {
   // Service instance
   connectService: ConnectService | null;
-  
+
   // Connection state
   connectionStatus: ConnectionStatus;
   isInitialized: boolean;
   isConnecting: boolean;
-  
+
   // Actions
   initialize: (config: AWSConnectConfig) => Promise<void>;
   reconnect: () => Promise<void>;
   disconnect: () => Promise<void>;
-  
+
   // Service access
   getService: () => ConnectService | null;
-  
+
   // Error handling
   lastError: Error | null;
   clearError: () => void;
@@ -33,13 +33,18 @@ export interface UseConnectReturn {
  * Wraps ConnectService with React hook patterns
  * Supports requirements 2.1, 2.2, 7.2, 7.4
  */
-export const useConnect = (initialConfig?: AWSConnectConfig): UseConnectReturn => {
-  const [connectService, setConnectService] = useState<ConnectService | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
+export const useConnect = (
+  initialConfig?: AWSConnectConfig
+): UseConnectReturn => {
+  const [connectService, setConnectService] = useState<ConnectService | null>(
+    null
+  );
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionStatus>('disconnected');
   const [isInitialized, setIsInitialized] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastError, setLastError] = useState<Error | null>(null);
-  
+
   // Use ref to track cleanup and prevent memory leaks
   const cleanupRef = useRef<(() => void) | null>(null);
   const configRef = useRef<AWSConnectConfig | null>(initialConfig || null);
@@ -62,11 +67,11 @@ export const useConnect = (initialConfig?: AWSConnectConfig): UseConnectReturn =
 
       // Create new ConnectService instance
       const service = new ConnectService(config.region);
-      
+
       // Set up connection status monitoring
       const handleConnectionStatusChange = (status: ConnectionStatus) => {
         setConnectionStatus(status);
-        
+
         if (status === 'failed') {
           setLastError(new Error('Connection to AWS Connect failed'));
         }
@@ -82,9 +87,11 @@ export const useConnect = (initialConfig?: AWSConnectConfig): UseConnectReturn =
       setConnectService(service);
       setConnectionStatus('disconnected');
       setIsInitialized(true);
-
     } catch (error) {
-      const errorObj = error instanceof Error ? error : new Error('Failed to initialize ConnectService');
+      const errorObj =
+        error instanceof Error
+          ? error
+          : new Error('Failed to initialize ConnectService');
       setLastError(errorObj);
       setConnectionStatus('failed');
       throw errorObj;
@@ -116,12 +123,12 @@ export const useConnect = (initialConfig?: AWSConnectConfig): UseConnectReturn =
       // Attempt to refresh connection token
       await connectService.refreshConnectionToken();
       setConnectionStatus('connected');
-
     } catch (error) {
-      const errorObj = error instanceof Error ? error : new Error('Reconnection failed');
+      const errorObj =
+        error instanceof Error ? error : new Error('Reconnection failed');
       setLastError(errorObj);
       setConnectionStatus('failed');
-      
+
       // Try to reinitialize if token refresh fails
       try {
         await initialize(configRef.current);
@@ -147,7 +154,8 @@ export const useConnect = (initialConfig?: AWSConnectConfig): UseConnectReturn =
       await connectService.endChat();
       setConnectionStatus('disconnected');
     } catch (error) {
-      const errorObj = error instanceof Error ? error : new Error('Disconnect failed');
+      const errorObj =
+        error instanceof Error ? error : new Error('Disconnect failed');
       setLastError(errorObj);
       console.warn('Error during disconnect:', errorObj);
     } finally {
@@ -215,7 +223,11 @@ export const useConnect = (initialConfig?: AWSConnectConfig): UseConnectReturn =
    */
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && connectionStatus === 'disconnected' && isInitialized) {
+      if (
+        document.visibilityState === 'visible' &&
+        connectionStatus === 'disconnected' &&
+        isInitialized
+      ) {
         // Attempt to reconnect when page becomes visible
         reconnect().catch(error => {
           console.warn('Failed to reconnect on visibility change:', error);
@@ -224,7 +236,7 @@ export const useConnect = (initialConfig?: AWSConnectConfig): UseConnectReturn =
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
@@ -259,20 +271,20 @@ export const useConnect = (initialConfig?: AWSConnectConfig): UseConnectReturn =
   return {
     // Service instance
     connectService,
-    
+
     // Connection state
     connectionStatus,
     isInitialized,
     isConnecting,
-    
+
     // Actions
     initialize,
     reconnect,
     disconnect,
-    
+
     // Service access
     getService,
-    
+
     // Error handling
     lastError,
     clearError,

@@ -32,7 +32,10 @@ class WidgetErrorBoundary extends React.Component<
   { children: React.ReactNode; onError?: (error: WidgetError) => void },
   { hasError: boolean; error?: Error }
 > {
-  constructor(props: { children: React.ReactNode; onError?: (error: WidgetError) => void }) {
+  constructor(props: {
+    children: React.ReactNode;
+    onError?: (error: WidgetError) => void;
+  }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -95,7 +98,8 @@ const DEFAULT_CONFIG: WidgetConfig = {
     theme: {
       primaryColor: '#007bff',
       secondaryColor: '#6c757d',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       borderRadius: '8px',
     },
     position: {
@@ -213,10 +217,7 @@ class WidgetInstanceImpl implements WidgetInstance {
       <React.StrictMode>
         <WidgetErrorBoundary onError={handleError}>
           <ThemeProvider theme={this.config.ui.theme}>
-            <ChatWidget
-              config={this.config}
-              onError={handleError}
-            />
+            <ChatWidget config={this.config} onError={handleError} />
           </ThemeProvider>
         </WidgetErrorBoundary>
       </React.StrictMode>

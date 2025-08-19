@@ -9,7 +9,7 @@ vi.mock('../utils/storage');
 describe('useWidget', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock localStorage
     const localStorageMock = {
       getItem: vi.fn(),

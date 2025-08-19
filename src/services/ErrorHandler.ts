@@ -54,7 +54,10 @@ export class ErrorHandler {
   /**
    * Set event handlers
    */
-  on<K extends keyof ErrorHandlerEvents>(event: K, handler: ErrorHandlerEvents[K]): void {
+  on<K extends keyof ErrorHandlerEvents>(
+    event: K,
+    handler: ErrorHandlerEvents[K]
+  ): void {
     this.events[event] = handler;
   }
 
@@ -69,21 +72,22 @@ export class ErrorHandler {
    * Handle an error with appropriate recovery strategy
    */
   async handleError(
-    error: Error | ChatError, 
+    error: Error | ChatError,
     errorCode?: ChatErrorCode,
     recoveryStrategy?: ErrorRecoveryStrategy
   ): Promise<void> {
     const chatError = this.normalizeToChatError(error, errorCode);
-    
+
     // Add to error history
     this.addToErrorHistory(chatError);
-    
+
     // Notify error event
     this.events.onError?.(chatError);
 
     // Determine recovery strategy
-    const strategy = recoveryStrategy || this.getDefaultRecoveryStrategy(chatError);
-    
+    const strategy =
+      recoveryStrategy || this.getDefaultRecoveryStrategy(chatError);
+
     if (strategy.canRecover(chatError)) {
       await this.attemptRecovery(chatError, strategy);
     } else {
@@ -103,13 +107,20 @@ export class ErrorHandler {
       recoverable: true,
     };
 
-    await this.handleError(chatError, 'CONNECTION_LOST', new ConnectionRecoveryStrategy());
+    await this.handleError(
+      chatError,
+      'CONNECTION_LOST',
+      new ConnectionRecoveryStrategy()
+    );
   }
 
   /**
    * Handle message send failures
    */
-  async handleMessageSendError(error: Error, messageContent: string): Promise<void> {
+  async handleMessageSendError(
+    error: Error,
+    messageContent: string
+  ): Promise<void> {
     const chatError: ChatError = {
       code: 'MESSAGE_SEND_FAILED',
       message: `Failed to send message: ${error.message}`,
@@ -117,7 +128,11 @@ export class ErrorHandler {
       recoverable: true,
     };
 
-    await this.handleError(chatError, 'MESSAGE_SEND_FAILED', new MessageRetryStrategy(messageContent));
+    await this.handleError(
+      chatError,
+      'MESSAGE_SEND_FAILED',
+      new MessageRetryStrategy(messageContent)
+    );
   }
 
   /**
@@ -145,7 +160,11 @@ export class ErrorHandler {
       recoverable: true,
     };
 
-    await this.handleError(chatError, 'AGENT_DISCONNECTED', new AgentReconnectionStrategy());
+    await this.handleError(
+      chatError,
+      'AGENT_DISCONNECTED',
+      new AgentReconnectionStrategy()
+    );
   }
 
   /**
@@ -159,7 +178,11 @@ export class ErrorHandler {
       recoverable: true,
     };
 
-    await this.handleError(chatError, 'RATE_LIMIT_EXCEEDED', new RateLimitRecoveryStrategy(retryAfter));
+    await this.handleError(
+      chatError,
+      'RATE_LIMIT_EXCEEDED',
+      new RateLimitRecoveryStrategy(retryAfter)
+    );
   }
 
   /**
@@ -192,12 +215,18 @@ export class ErrorHandler {
   /**
    * Get active recovery attempts
    */
-  getActiveRecoveries(): { errorId: string; error: ChatError; attemptCount: number }[] {
-    return Array.from(this.activeRecoveries.entries()).map(([errorId, context]) => ({
-      errorId,
-      error: context.error,
-      attemptCount: context.attemptCount,
-    }));
+  getActiveRecoveries(): {
+    errorId: string;
+    error: ChatError;
+    attemptCount: number;
+  }[] {
+    return Array.from(this.activeRecoveries.entries()).map(
+      ([errorId, context]) => ({
+        errorId,
+        error: context.error,
+        attemptCount: context.attemptCount,
+      })
+    );
   }
 
   /**
@@ -221,7 +250,7 @@ export class ErrorHandler {
     this.cancelAllRecoveries();
     this.clearErrorHistory();
     this.events = {};
-    
+
     window.removeEventListener('online', this.handleOnline.bind(this));
     window.removeEventListener('offline', this.handleOffline.bind(this));
   }
@@ -229,10 +258,13 @@ export class ErrorHandler {
   /**
    * Attempt recovery for an error
    */
-  private async attemptRecovery(error: ChatError, strategy: ErrorRecoveryStrategy): Promise<void> {
+  private async attemptRecovery(
+    error: ChatError,
+    strategy: ErrorRecoveryStrategy
+  ): Promise<void> {
     const errorId = this.generateErrorId(error);
     const existingContext = this.activeRecoveries.get(errorId);
-    
+
     if (existingContext) {
       // Recovery already in progress
       return;
@@ -252,9 +284,12 @@ export class ErrorHandler {
   /**
    * Execute recovery attempt
    */
-  private async executeRecovery(errorId: string, context: ErrorContext): Promise<void> {
+  private async executeRecovery(
+    errorId: string,
+    context: ErrorContext
+  ): Promise<void> {
     const { error, recoveryStrategy } = context;
-    
+
     if (context.attemptCount >= recoveryStrategy.getMaxRetries()) {
       // Max retries exceeded
       this.activeRecoveries.delete(errorId);
@@ -264,23 +299,23 @@ export class ErrorHandler {
 
     context.attemptCount++;
     context.lastAttempt = new Date();
-    
+
     this.events.onRecoveryAttempt?.(error, context.attemptCount);
 
     try {
       await recoveryStrategy.recover(error);
-      
+
       // Recovery successful
       this.activeRecoveries.delete(errorId);
       this.events.onRecoverySuccess?.(error);
     } catch (recoveryError) {
       // Recovery failed, schedule retry
       const delay = recoveryStrategy.getRetryDelay(context.attemptCount);
-      
+
       context.timeout = setTimeout(() => {
         this.executeRecovery(errorId, context);
       }, delay);
-      
+
       this.events.onRecoveryFailed?.(error, false);
     }
   }
@@ -288,7 +323,10 @@ export class ErrorHandler {
   /**
    * Normalize error to ChatError format
    */
-  private normalizeToChatError(error: Error | ChatError, errorCode?: ChatErrorCode): ChatError {
+  private normalizeToChatError(
+    error: Error | ChatError,
+    errorCode?: ChatErrorCode
+  ): ChatError {
     if ('code' in error && 'recoverable' in error) {
       return error as ChatError;
     }
@@ -326,7 +364,7 @@ export class ErrorHandler {
    */
   private addToErrorHistory(error: ChatError): void {
     this.errorHistory.push(error);
-    
+
     // Limit history size
     if (this.errorHistory.length > this.maxErrorHistory) {
       this.errorHistory.shift();
@@ -368,7 +406,8 @@ class ConnectionRecoveryStrategy implements ErrorRecoveryStrategy {
   async recover(error: ChatError): Promise<void> {
     // This would be implemented to reconnect to AWS Connect
     // For now, we'll simulate a recovery attempt
-    if (Math.random() > 0.3) { // 70% success rate
+    if (Math.random() > 0.3) {
+      // 70% success rate
       return Promise.resolve();
     }
     throw new Error('Connection recovery failed');
@@ -395,7 +434,8 @@ class MessageRetryStrategy implements ErrorRecoveryStrategy {
 
   async recover(error: ChatError): Promise<void> {
     // This would be implemented to retry sending the message
-    if (Math.random() > 0.2) { // 80% success rate
+    if (Math.random() > 0.2) {
+      // 80% success rate
       return Promise.resolve();
     }
     throw new Error('Message retry failed');
@@ -420,7 +460,8 @@ class AgentReconnectionStrategy implements ErrorRecoveryStrategy {
 
   async recover(error: ChatError): Promise<void> {
     // This would be implemented to reconnect to an agent
-    if (Math.random() > 0.5) { // 50% success rate
+    if (Math.random() > 0.5) {
+      // 50% success rate
       return Promise.resolve();
     }
     throw new Error('Agent reconnection failed');

@@ -32,27 +32,27 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   // Handle input changes
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = event.target.value;
-    
+
     // Enforce character limit
     if (maxLength && value.length > maxLength) {
       return;
     }
-    
+
     setMessage(value);
     adjustTextareaHeight();
-    
+
     // Handle typing indicator
     if (onTyping) {
       if (!isTyping && value.trim()) {
         setIsTyping(true);
         onTyping(true);
       }
-      
+
       // Clear existing timeout
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      
+
       // Set new timeout to stop typing indicator
       if (value.trim()) {
         typingTimeoutRef.current = window.setTimeout(() => {
@@ -78,21 +78,21 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     if (!trimmedMessage || disabled) {
       return;
     }
-    
+
     onSendMessage(trimmedMessage);
     setMessage('');
-    
+
     // Stop typing indicator
     if (onTyping && isTyping) {
       setIsTyping(false);
       onTyping(false);
     }
-    
+
     // Clear typing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
+
     // Reset textarea height
     setTimeout(adjustTextareaHeight, 0);
   };
@@ -104,7 +104,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       event.preventDefault();
       sendMessage();
     }
-    
+
     // Handle Escape key
     if (event.key === 'Escape') {
       setMessage('');
@@ -160,7 +160,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             </div>
           )}
         </div>
-        
+
         <button
           type="submit"
           className={`message-input__send-button ${canSend ? 'message-input__send-button--active' : ''}`}
@@ -187,7 +187,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           </svg>
         </button>
       </div>
-      
+
       {/* Keyboard shortcuts hint */}
       <div className="message-input__hint" aria-hidden="true">
         Press Enter to send, Shift+Enter for new line

@@ -424,24 +424,24 @@ class WidgetAnalytics {
         // Load gtag
         const script = document.createElement('script');
         script.async = true;
-        script.src = \`https://www.googletagmanager.com/gtag/js?id=\${trackingId}\`;
-        document.head.appendChild(script);
-        
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${trackingId}`;
+                document.head.appendChild(script);
+
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', trackingId, this.config.providers.googleAnalytics.config);
-        
+
         window.gtag = gtag;
     }
-    
+
     initCustomAnalytics() {
         // Set up batch sending for custom analytics
         setInterval(() => {
             this.sendBatch();
         }, this.config.providers.customAnalytics.flushInterval);
     }
-    
+
     track(eventName, properties = {}) {
         const event = {
             name: eventName,
@@ -453,14 +453,14 @@ class WidgetAnalytics {
                 widget_version: '${VERSION}'
             }
         };
-        
+
         if (this.isInitialized) {
             this.sendEvent(event);
         } else {
             this.eventQueue.push(event);
         }
     }
-    
+
     sendEvent(event) {
         // Send to Google Analytics
         if (window.gtag && this.config.providers.googleAnalytics.events[event.name]) {
@@ -470,27 +470,27 @@ class WidgetAnalytics {
                 ...event.properties
             });
         }
-        
+
         // Add to custom analytics queue
         if (this.config.providers.customAnalytics.endpoint) {
             this.eventQueue.push(event);
-            
+
             if (this.eventQueue.length >= this.config.providers.customAnalytics.batchSize) {
                 this.sendBatch();
             }
         }
     }
-    
+
     sendBatch() {
         if (this.eventQueue.length === 0) return;
-        
+
         const batch = this.eventQueue.splice(0, this.config.providers.customAnalytics.batchSize);
-        
+
         fetch(this.config.providers.customAnalytics.endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': \`Bearer \${this.config.providers.customAnalytics.apiKey}\`
+                'Authorization': `Bearer ${this.config.providers.customAnalytics.apiKey}`
             },
             body: JSON.stringify({ events: batch })
         }).catch(error => {
@@ -499,7 +499,7 @@ class WidgetAnalytics {
             this.eventQueue.unshift(...batch);
         });
     }
-    
+
     flushQueue() {
         while (this.eventQueue.length > 0) {
             const event = this.eventQueue.shift();
@@ -512,18 +512,18 @@ class WidgetAnalytics {
 window.WidgetAnalytics = WidgetAnalytics;
 `;
 
-        fs.writeFileSync(
-            path.join(this.configDir, 'analytics-integration.js'),
-            analyticsIntegration
-        );
+            fs.writeFileSync(
+                path.join(this.configDir, 'analytics-integration.js'),
+                analyticsIntegration
+            );
 
-        console.log('  ✓ Analytics configuration created');
-    }
+            console.log('  ✓ Analytics configuration created');
+        }
 
     async createHealthCheckScript() {
-        console.log('🏥 Creating health check script...');
+            console.log('🏥 Creating health check script...');
 
-        const healthCheck = `#!/usr/bin/env node
+            const healthCheck = `#!/usr/bin / env node
 
 /**
  * Health check script for AWS Connect Chat Widget
@@ -558,26 +558,26 @@ class HealthChecker {
     }
 
     async check() {
-        console.log(\`🏥 Running health check for \${this.environment}...\`);
-        
+        console.log(`🏥 Running health check for ${this.environment}...`);
+
         for (const path of this.config.paths) {
             const result = await this.checkEndpoint(path);
             this.results.push(result);
         }
-        
+
         this.printResults();
         return this.isHealthy();
     }
 
     async checkEndpoint(path) {
-        const url = \`https://\${this.config.domain}\${path}\`;
+        const url = `https://${this.config.domain}${path}`;
         const startTime = performance.now();
-        
+
         return new Promise((resolve) => {
             const req = https.get(url, (res) => {
                 const endTime = performance.now();
                 const responseTime = endTime - startTime;
-                
+
                 let data = '';
                 res.on('data', chunk => data += chunk);
                 res.on('end', () => {
@@ -590,7 +590,7 @@ class HealthChecker {
                     });
                 });
             });
-            
+
             req.on('error', (error) => {
                 const endTime = performance.now();
                 resolve({
@@ -601,7 +601,7 @@ class HealthChecker {
                     healthy: false
                 });
             });
-            
+
             req.setTimeout(5000, () => {
                 req.destroy();
                 resolve({
@@ -616,25 +616,25 @@ class HealthChecker {
     }
 
     printResults() {
-        console.log(\`\\n📊 Health Check Results for \${this.environment}:\`);
+        console.log(`\n📊 Health Check Results for ${this.environment}:`);
         console.log('━'.repeat(80));
-        
+
         this.results.forEach(result => {
             const status = result.healthy ? '✅' : '❌';
             const statusText = result.status || 'ERROR';
-            const responseTime = \`\${result.responseTime}ms\`;
-            
-            console.log(\`\${status} \${result.url}\`);
-            console.log(\`   Status: \${statusText} | Response Time: \${responseTime}\`);
-            
+            const responseTime = `${result.responseTime}ms`;
+
+            console.log(`${status} ${result.url}`);
+            console.log(`   Status: ${statusText} | Response Time: ${responseTime}`);
+
             if (result.error) {
-                console.log(\`   Error: \${result.error}\`);
+                console.log(`   Error: ${result.error}`);
             }
-            
+
             if (result.contentLength) {
-                console.log(\`   Content Length: \${result.contentLength} bytes\`);
+                console.log(`   Content Length: ${result.contentLength} bytes`);
             }
-            
+
             console.log('');
         });
     }
@@ -643,9 +643,9 @@ class HealthChecker {
         const healthyCount = this.results.filter(r => r.healthy).length;
         const totalCount = this.results.length;
         const availability = (healthyCount / totalCount) * 100;
-        
-        console.log(\`📈 Overall Health: \${availability.toFixed(1)}%\`);
-        
+
+        console.log(`📈 Overall Health: ${availability.toFixed(1)}%`);
+
         if (availability >= CONFIG.thresholds.availability) {
             console.log('✅ System is healthy');
             return true;
@@ -659,19 +659,19 @@ class HealthChecker {
 // CLI interface
 async function main() {
     const environment = process.argv[2];
-    
+
     if (!environment || !['staging', 'production'].includes(environment)) {
         console.error('Usage: node health-check.js <staging|production>');
         process.exit(1);
     }
-    
+
     const checker = new HealthChecker(environment);
     const isHealthy = await checker.check();
-    
+
     process.exit(isHealthy ? 0 : 1);
 }
 
-if (import.meta.url === \`file://\${process.argv[1]}\`) {
+if (import.meta.url === 'file://' + process.argv[1]) {
     main().catch(error => {
         console.error('Health check failed:', error);
         process.exit(1);
@@ -704,21 +704,21 @@ class PerformanceMonitor {
         this.observers = [];
         this.init();
     }
-    
+
     init() {
         // Monitor Core Web Vitals
         this.observeCoreWebVitals();
-        
+
         // Monitor widget-specific metrics
         this.observeWidgetMetrics();
-        
+
         // Monitor resource loading
         this.observeResourceTiming();
-        
+
         // Send metrics periodically
         setInterval(() => this.sendMetrics(), 30000);
     }
-    
+
     observeCoreWebVitals() {
         // Largest Contentful Paint (LCP)
         if ('PerformanceObserver' in window) {
@@ -729,7 +729,7 @@ class PerformanceMonitor {
             });
             lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
             this.observers.push(lcpObserver);
-            
+
             // First Input Delay (FID)
             const fidObserver = new PerformanceObserver((list) => {
                 const entries = list.getEntries();
@@ -739,7 +739,7 @@ class PerformanceMonitor {
             });
             fidObserver.observe({ entryTypes: ['first-input'] });
             this.observers.push(fidObserver);
-            
+
             // Cumulative Layout Shift (CLS)
             let clsValue = 0;
             const clsObserver = new PerformanceObserver((list) => {
@@ -755,11 +755,11 @@ class PerformanceMonitor {
             this.observers.push(clsObserver);
         }
     }
-    
+
     observeWidgetMetrics() {
         // Widget load time
         const widgetLoadStart = performance.now();
-        
+
         // Monitor when widget becomes interactive
         const checkWidgetReady = () => {
             if (window.AWSConnectChatWidgetAPI) {
@@ -769,14 +769,14 @@ class PerformanceMonitor {
             setTimeout(checkWidgetReady, 100);
         };
         checkWidgetReady();
-        
+
         // Monitor chat connection time
         if (window.AWSConnectChatWidgetAPI) {
             const originalInit = window.AWSConnectChatWidgetAPI.init;
             window.AWSConnectChatWidgetAPI.init = (...args) => {
                 const connectStart = performance.now();
                 const result = originalInit.apply(this, args);
-                
+
                 // Monitor connection establishment
                 const checkConnection = () => {
                     const state = window.AWSConnectChatWidgetAPI.getState();
@@ -787,12 +787,12 @@ class PerformanceMonitor {
                     setTimeout(checkConnection, 100);
                 };
                 checkConnection();
-                
+
                 return result;
             };
         }
     }
-    
+
     observeResourceTiming() {
         if ('PerformanceObserver' in window) {
             const resourceObserver = new PerformanceObserver((list) => {
@@ -812,10 +812,10 @@ class PerformanceMonitor {
             this.observers.push(resourceObserver);
         }
     }
-    
+
     sendMetrics() {
         if (Object.keys(this.metrics).length === 0) return;
-        
+
         const payload = {
             timestamp: new Date().toISOString(),
             url: window.location.href,
@@ -823,19 +823,19 @@ class PerformanceMonitor {
             metrics: this.metrics,
             connection: this.getConnectionInfo()
         };
-        
+
         // Send to analytics endpoint
         if (window.WidgetAnalytics) {
             window.WidgetAnalytics.track('performance_metrics', payload);
         }
-        
+
         // Send to custom monitoring endpoint
         this.sendToMonitoringEndpoint(payload);
-        
+
         // Reset metrics after sending
         this.metrics = {};
     }
-    
+
     getConnectionInfo() {
         if ('connection' in navigator) {
             return {
@@ -846,11 +846,11 @@ class PerformanceMonitor {
         }
         return null;
     }
-    
+
     sendToMonitoringEndpoint(payload) {
         const endpoint = '${MONITORING_ENDPOINT}';
         if (!endpoint) return;
-        
+
         fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -861,7 +861,7 @@ class PerformanceMonitor {
             console.warn('Failed to send performance metrics:', error);
         });
     }
-    
+
     destroy() {
         this.observers.forEach(observer => observer.disconnect());
         this.observers = [];
@@ -924,7 +924,7 @@ async function main() {
     await monitor.setup();
 }
 
-if (import.meta.url === \`file://\${process.argv[1]}\`) {
+if (import.meta.url === 'file://' + process.argv[1]) {
     main().catch(error => {
         console.error('Setup failed:', error);
         process.exit(1);
@@ -949,7 +949,7 @@ async function main() {
     await setup.setup();
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === 'file://' + process.argv[1]) {
     main().catch(error => {
         console.error('Setup failed:', error);
         process.exit(1);

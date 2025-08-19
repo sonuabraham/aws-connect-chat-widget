@@ -33,7 +33,7 @@ export const ChatEndDialog: React.FC<ChatEndDialogProps> = ({
         <div className="chat-end-dialog__header">
           <h3 className="chat-end-dialog__title">End Chat Session</h3>
         </div>
-        
+
         <div className="chat-end-dialog__content">
           <div className="chat-end-dialog__icon">
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -59,16 +59,17 @@ export const ChatEndDialog: React.FC<ChatEndDialogProps> = ({
               />
             </svg>
           </div>
-          
+
           <div className="chat-end-dialog__message">
             <p className="chat-end-dialog__primary-text">
               Are you sure you want to end this chat session?
             </p>
             <p className="chat-end-dialog__secondary-text">
-              This action cannot be undone. Your conversation will be saved and you can download a transcript if needed.
+              This action cannot be undone. Your conversation will be saved and
+              you can download a transcript if needed.
             </p>
           </div>
-          
+
           <div className="chat-end-dialog__stats">
             <div className="chat-stat">
               <span className="chat-stat__label">Session Duration:</span>
@@ -80,7 +81,7 @@ export const ChatEndDialog: React.FC<ChatEndDialogProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="chat-end-dialog__actions">
           <button
             className="chat-end-dialog__button chat-end-dialog__button--secondary"

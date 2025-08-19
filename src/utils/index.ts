@@ -14,7 +14,7 @@ export {
   validateFeatureConfiguration,
   WidgetConfigurationValidator,
   defaultValidator,
-  configurationSchema
+  configurationSchema,
 } from './validation';
 
 // Export validation types
@@ -25,7 +25,7 @@ export type {
   ConfigurationValidator,
   ConfigurationSchema,
   FieldSchema,
-  ValidatorFunction
+  ValidatorFunction,
 } from '../types/validation';
 
 // Export styling utilities
@@ -38,7 +38,7 @@ export {
   commonStyles,
   createButtonStyles,
   createInputStyles,
-  createSurfaceStyles
+  createSurfaceStyles,
 } from './styled';
 
 // Export styling types
@@ -47,5 +47,5 @@ export type {
   StyleObject,
   ResponsiveStyles,
   StyleVariants,
-  StyleDefinition
+  StyleDefinition,
 } from './styled';

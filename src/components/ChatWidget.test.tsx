@@ -67,17 +67,34 @@ vi.mock('./ChatButton', () => ({
 }));
 
 vi.mock('./ChatWindow', () => ({
-  ChatWindow: ({ isOpen, onClose, onMinimize, chatState, onSendMessage, onTyping }: any) => (
+  ChatWindow: ({
+    isOpen,
+    onClose,
+    onMinimize,
+    chatState,
+    onSendMessage,
+    onTyping,
+  }: any) =>
     isOpen ? (
       <div data-testid="chat-window">
-        <button data-testid="close-button" onClick={onClose}>Close</button>
-        <button data-testid="minimize-button" onClick={onMinimize}>Minimize</button>
-        <button data-testid="send-message" onClick={() => onSendMessage('test message')}>Send</button>
-        <button data-testid="start-typing" onClick={() => onTyping(true)}>Start Typing</button>
+        <button data-testid="close-button" onClick={onClose}>
+          Close
+        </button>
+        <button data-testid="minimize-button" onClick={onMinimize}>
+          Minimize
+        </button>
+        <button
+          data-testid="send-message"
+          onClick={() => onSendMessage('test message')}
+        >
+          Send
+        </button>
+        <button data-testid="start-typing" onClick={() => onTyping(true)}>
+          Start Typing
+        </button>
         <div data-testid="chat-status">{chatState.status}</div>
       </div>
-    ) : null
-  ),
+    ) : null,
 }));
 
 describe('ChatWidget', () => {
@@ -122,7 +139,7 @@ describe('ChatWidget', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset mock implementations
     Object.assign(mockUseChat, {
       chatState: {
@@ -162,21 +179,21 @@ describe('ChatWidget', () => {
   describe('Basic Rendering', () => {
     it('should render chat button', () => {
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(screen.getByTestId('chat-button')).toBeInTheDocument();
     });
 
     it('should not render chat window when closed', () => {
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(screen.queryByTestId('chat-window')).not.toBeInTheDocument();
     });
 
     it('should render chat window when open', () => {
       Object.assign(mockUseWidget, { isOpen: true });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(screen.getByTestId('chat-window')).toBeInTheDocument();
     });
   });
@@ -184,7 +201,7 @@ describe('ChatWidget', () => {
   describe('AWS Connect Initialization', () => {
     it('should initialize AWS Connect service on mount', () => {
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(mockUseConnect.initialize).toHaveBeenCalledWith(mockConfig.aws);
     });
 
@@ -192,9 +209,9 @@ describe('ChatWidget', () => {
       const mockOnError = vi.fn();
       const initError = new Error('Connection failed');
       mockUseConnect.initialize.mockRejectedValue(initError);
-      
+
       render(<ChatWidget {...defaultProps} onError={mockOnError} />);
-      
+
       await waitFor(() => {
         expect(mockOnError).toHaveBeenCalledWith({
           code: 'AWS_CONNECTION_FAILED',
@@ -206,9 +223,9 @@ describe('ChatWidget', () => {
 
     it('should not reinitialize on subsequent renders', () => {
       const { rerender } = render(<ChatWidget {...defaultProps} />);
-      
+
       rerender(<ChatWidget {...defaultProps} />);
-      
+
       expect(mockUseConnect.initialize).toHaveBeenCalledTimes(1);
     });
   });
@@ -217,15 +234,17 @@ describe('ChatWidget', () => {
     it('should call onStateChange when widget state changes', () => {
       const mockOnStateChange = vi.fn();
       Object.assign(mockUseWidget, { widgetState: 'initializing' });
-      
-      render(<ChatWidget {...defaultProps} onStateChange={mockOnStateChange} />);
-      
+
+      render(
+        <ChatWidget {...defaultProps} onStateChange={mockOnStateChange} />
+      );
+
       expect(mockOnStateChange).toHaveBeenCalledWith('initializing');
     });
 
     it('should handle missing onStateChange callback', () => {
       Object.assign(mockUseWidget, { widgetState: 'initializing' });
-      
+
       expect(() => {
         render(<ChatWidget {...defaultProps} onStateChange={undefined} />);
       }).not.toThrow();
@@ -235,29 +254,29 @@ describe('ChatWidget', () => {
   describe('Chat Button Interactions', () => {
     it('should open widget when chat button is clicked and widget is closed', () => {
       render(<ChatWidget {...defaultProps} />);
-      
+
       fireEvent.click(screen.getByTestId('chat-button'));
-      
+
       expect(mockUseWidget.openWidget).toHaveBeenCalled();
     });
 
     it('should close widget when chat button is clicked and widget is open', () => {
       Object.assign(mockUseWidget, { isOpen: true });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       fireEvent.click(screen.getByTestId('chat-button'));
-      
+
       expect(mockUseWidget.closeWidget).toHaveBeenCalled();
     });
 
     it('should open widget and mark messages as read when minimized', () => {
       Object.assign(mockUseWidget, { isMinimized: true });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       fireEvent.click(screen.getByTestId('chat-button'));
-      
+
       expect(mockUseWidget.openWidget).toHaveBeenCalled();
       expect(mockUseChat.markMessagesAsRead).toHaveBeenCalled();
     });
@@ -270,21 +289,21 @@ describe('ChatWidget', () => {
 
     it('should close widget when chat window close button is clicked', () => {
       render(<ChatWidget {...defaultProps} />);
-      
+
       fireEvent.click(screen.getByTestId('close-button'));
-      
+
       expect(mockUseWidget.closeWidget).toHaveBeenCalled();
     });
 
     it('should end chat before closing when connected', async () => {
-      Object.assign(mockUseChat, { 
-        chatState: { ...mockUseChat.chatState, status: 'connected' }
+      Object.assign(mockUseChat, {
+        chatState: { ...mockUseChat.chatState, status: 'connected' },
       });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       fireEvent.click(screen.getByTestId('close-button'));
-      
+
       await waitFor(() => {
         expect(mockUseChat.endChat).toHaveBeenCalled();
       });
@@ -292,15 +311,15 @@ describe('ChatWidget', () => {
     });
 
     it('should handle end chat error gracefully', async () => {
-      Object.assign(mockUseChat, { 
+      Object.assign(mockUseChat, {
         chatState: { ...mockUseChat.chatState, status: 'connected' },
-        endChat: vi.fn().mockRejectedValue(new Error('End chat failed'))
+        endChat: vi.fn().mockRejectedValue(new Error('End chat failed')),
       });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       fireEvent.click(screen.getByTestId('close-button'));
-      
+
       await waitFor(() => {
         expect(mockUseWidget.closeWidget).toHaveBeenCalled();
       });
@@ -308,9 +327,9 @@ describe('ChatWidget', () => {
 
     it('should minimize widget when minimize button is clicked', () => {
       render(<ChatWidget {...defaultProps} />);
-      
+
       fireEvent.click(screen.getByTestId('minimize-button'));
-      
+
       expect(mockUseWidget.minimizeWidget).toHaveBeenCalled();
     });
   });
@@ -322,9 +341,9 @@ describe('ChatWidget', () => {
 
     it('should send message when requested', async () => {
       render(<ChatWidget {...defaultProps} />);
-      
+
       fireEvent.click(screen.getByTestId('send-message'));
-      
+
       await waitFor(() => {
         expect(mockUseChat.sendMessage).toHaveBeenCalledWith('test message');
       });
@@ -333,11 +352,11 @@ describe('ChatWidget', () => {
     it('should handle send message error', async () => {
       const mockOnError = vi.fn();
       mockUseChat.sendMessage.mockRejectedValue(new Error('Send failed'));
-      
+
       render(<ChatWidget {...defaultProps} onError={mockOnError} />);
-      
+
       fireEvent.click(screen.getByTestId('send-message'));
-      
+
       await waitFor(() => {
         expect(mockOnError).toHaveBeenCalledWith({
           code: 'NETWORK_ERROR',
@@ -349,23 +368,23 @@ describe('ChatWidget', () => {
 
     it('should handle typing indicator', () => {
       render(<ChatWidget {...defaultProps} />);
-      
+
       fireEvent.click(screen.getByTestId('start-typing'));
-      
+
       expect(mockUseChat.setTyping).toHaveBeenCalledWith(true);
     });
   });
 
   describe('Chat Initialization Flow', () => {
     it('should set default visitor info when widget opens without visitor info', () => {
-      Object.assign(mockUseWidget, { 
-        isOpen: true, 
+      Object.assign(mockUseWidget, {
+        isOpen: true,
         hasVisitorInfo: false,
-        widgetState: 'initializing'
+        widgetState: 'initializing',
       });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(mockUseWidget.setVisitorInfo).toHaveBeenCalledWith({
         name: 'Website Visitor',
         email: 'visitor@example.com',
@@ -373,34 +392,42 @@ describe('ChatWidget', () => {
     });
 
     it('should initialize chat when visitor info is available', () => {
-      const visitorInfo = { name: 'Test User', email: 'test@example.com', sessionId: 'test' };
-      Object.assign(mockUseWidget, { 
-        isOpen: true, 
+      const visitorInfo = {
+        name: 'Test User',
+        email: 'test@example.com',
+        sessionId: 'test',
+      };
+      Object.assign(mockUseWidget, {
+        isOpen: true,
         hasVisitorInfo: true,
         visitorInfo,
-        widgetState: 'initializing'
+        widgetState: 'initializing',
       });
       Object.assign(mockUseConnect, { connectionStatus: 'disconnected' });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(mockUseChat.initializeChat).toHaveBeenCalledWith(visitorInfo);
     });
 
     it('should handle chat initialization error', async () => {
       const mockOnError = vi.fn();
-      const visitorInfo = { name: 'Test User', email: 'test@example.com', sessionId: 'test' };
-      Object.assign(mockUseWidget, { 
-        isOpen: true, 
+      const visitorInfo = {
+        name: 'Test User',
+        email: 'test@example.com',
+        sessionId: 'test',
+      };
+      Object.assign(mockUseWidget, {
+        isOpen: true,
         hasVisitorInfo: true,
         visitorInfo,
-        widgetState: 'initializing'
+        widgetState: 'initializing',
       });
       Object.assign(mockUseConnect, { connectionStatus: 'disconnected' });
       mockUseChat.initializeChat.mockRejectedValue(new Error('Init failed'));
-      
+
       render(<ChatWidget {...defaultProps} onError={mockOnError} />);
-      
+
       await waitFor(() => {
         expect(mockOnError).toHaveBeenCalledWith({
           code: 'INITIALIZATION_FAILED',
@@ -411,17 +438,21 @@ describe('ChatWidget', () => {
     });
 
     it('should not initialize chat when already connected', () => {
-      const visitorInfo = { name: 'Test User', email: 'test@example.com', sessionId: 'test' };
-      Object.assign(mockUseWidget, { 
-        isOpen: true, 
+      const visitorInfo = {
+        name: 'Test User',
+        email: 'test@example.com',
+        sessionId: 'test',
+      };
+      Object.assign(mockUseWidget, {
+        isOpen: true,
         hasVisitorInfo: true,
         visitorInfo,
-        widgetState: 'initializing'
+        widgetState: 'initializing',
       });
       Object.assign(mockUseConnect, { connectionStatus: 'connected' });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(mockUseChat.initializeChat).not.toHaveBeenCalled();
     });
   });
@@ -429,28 +460,30 @@ describe('ChatWidget', () => {
   describe('Message Read Status', () => {
     it('should mark messages as read when widget is opened', () => {
       Object.assign(mockUseWidget, { isOpen: true, isMinimized: false });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(mockUseChat.markMessagesAsRead).toHaveBeenCalled();
     });
 
     it('should not mark messages as read when widget is minimized', () => {
       Object.assign(mockUseWidget, { isOpen: false, isMinimized: true });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(mockUseChat.markMessagesAsRead).not.toHaveBeenCalled();
     });
   });
 
   describe('Props Passing', () => {
     it('should pass correct props to ChatButton', () => {
-      Object.assign(mockUseChat, { chatState: { ...mockUseChat.chatState, unreadCount: 5 } });
+      Object.assign(mockUseChat, {
+        chatState: { ...mockUseChat.chatState, unreadCount: 5 },
+      });
       Object.assign(mockUseWidget, { isOpen: true });
-      
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       const chatButton = screen.getByTestId('chat-button');
       expect(chatButton).toHaveAttribute('data-is-open', 'true');
       expect(chatButton).toHaveAttribute('data-unread-count', '5');
@@ -458,10 +491,12 @@ describe('ChatWidget', () => {
 
     it('should pass correct props to ChatWindow', () => {
       Object.assign(mockUseWidget, { isOpen: true });
-      Object.assign(mockUseChat, { chatState: { ...mockUseChat.chatState, status: 'connected' } });
-      
+      Object.assign(mockUseChat, {
+        chatState: { ...mockUseChat.chatState, status: 'connected' },
+      });
+
       render(<ChatWidget {...defaultProps} />);
-      
+
       expect(screen.getByTestId('chat-status')).toHaveTextContent('connected');
     });
   });
@@ -469,7 +504,7 @@ describe('ChatWidget', () => {
   describe('Error Handling', () => {
     it('should handle missing onError callback', async () => {
       mockUseConnect.initialize.mockRejectedValue(new Error('Test error'));
-      
+
       expect(() => {
         render(<ChatWidget {...defaultProps} onError={undefined} />);
       }).not.toThrow();
@@ -479,11 +514,11 @@ describe('ChatWidget', () => {
       const mockOnError = vi.fn();
       mockUseChat.sendMessage.mockRejectedValue('String error');
       Object.assign(mockUseWidget, { isOpen: true });
-      
+
       render(<ChatWidget {...defaultProps} onError={mockOnError} />);
-      
+
       fireEvent.click(screen.getByTestId('send-message'));
-      
+
       await waitFor(() => {
         expect(mockOnError).toHaveBeenCalledWith({
           code: 'NETWORK_ERROR',
@@ -497,20 +532,24 @@ describe('ChatWidget', () => {
   describe('Component Integration', () => {
     it('should integrate all hooks correctly', () => {
       render(<ChatWidget {...defaultProps} />);
-      
+
       // Verify hooks are called with correct parameters
-      expect(require('../hooks/useChat').useChat).toHaveBeenCalledWith(mockUseConnect.connectService);
-      expect(require('../hooks/useWidget').useWidget).toHaveBeenCalledWith(mockConfig);
+      expect(require('../hooks/useChat').useChat).toHaveBeenCalledWith(
+        mockUseConnect.connectService
+      );
+      expect(require('../hooks/useWidget').useWidget).toHaveBeenCalledWith(
+        mockConfig
+      );
     });
 
     it('should handle hook state changes', () => {
       const { rerender } = render(<ChatWidget {...defaultProps} />);
-      
+
       // Simulate state change
       Object.assign(mockUseWidget, { isOpen: true });
-      
+
       rerender(<ChatWidget {...defaultProps} />);
-      
+
       expect(screen.getByTestId('chat-window')).toBeInTheDocument();
     });
   });
@@ -518,7 +557,7 @@ describe('ChatWidget', () => {
   describe('Edge Cases', () => {
     it('should handle missing AWS config', () => {
       const configWithoutAws = { ...mockConfig, aws: undefined as any };
-      
+
       expect(() => {
         render(<ChatWidget {...defaultProps} config={configWithoutAws} />);
       }).not.toThrow();
@@ -526,13 +565,15 @@ describe('ChatWidget', () => {
 
     it('should handle undefined callbacks gracefully', () => {
       Object.assign(mockUseWidget, { isOpen: true });
-      
+
       expect(() => {
-        render(<ChatWidget 
-          {...defaultProps} 
-          onStateChange={undefined}
-          onError={undefined}
-        />);
+        render(
+          <ChatWidget
+            {...defaultProps}
+            onStateChange={undefined}
+            onError={undefined}
+          />
+        );
       }).not.toThrow();
     });
   });

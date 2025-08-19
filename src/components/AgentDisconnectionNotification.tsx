@@ -16,7 +16,9 @@ export interface AgentDisconnectionNotificationProps {
  * AgentDisconnectionNotification component - Handles agent disconnection notifications
  * Requirements: 4.3
  */
-export const AgentDisconnectionNotification: React.FC<AgentDisconnectionNotificationProps> = ({
+export const AgentDisconnectionNotification: React.FC<
+  AgentDisconnectionNotificationProps
+> = ({
   isVisible,
   agentName,
   onReconnect,
@@ -84,14 +86,16 @@ export const AgentDisconnectionNotification: React.FC<AgentDisconnectionNotifica
             />
           </svg>
         </div>
-        
+
         <div className="agent-disconnection-notification__message">
           <div className="agent-disconnection-notification__title">
             Agent Disconnected
           </div>
           <div className="agent-disconnection-notification__description">
-            {agentName ? `${agentName} has disconnected` : 'The agent has disconnected'}. 
-            You can try reconnecting or continue the conversation later.
+            {agentName
+              ? `${agentName} has disconnected`
+              : 'The agent has disconnected'}
+            . You can try reconnecting or continue the conversation later.
           </div>
         </div>
 

@@ -1,5 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { ChatWidget } from '../components/ChatWidget';
@@ -69,7 +75,7 @@ describe('Chat Flow Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    
+
     // Reset WebSocket mock
     Object.assign(mockWebSocket, {
       send: vi.fn(),
@@ -100,7 +106,9 @@ describe('Chat Flow Integration Tests', () => {
       );
 
       // Step 1: Initial state - widget should be closed
-      expect(screen.getByRole('button', { name: 'Open chat' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Open chat' })
+      ).toBeInTheDocument();
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
       // Step 2: Click chat button to open widget
@@ -150,12 +158,7 @@ describe('Chat Flow Integration Tests', () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       const onError = vi.fn();
 
-      render(
-        <ChatWidget
-          config={mockConfig}
-          onError={onError}
-        />
-      );
+      render(<ChatWidget config={mockConfig} onError={onError} />);
 
       // Open widget
       await user.click(screen.getByRole('button', { name: 'Open chat' }));
@@ -180,7 +183,7 @@ describe('Chat Flow Integration Tests', () => {
   describe('Message Sending and Receiving Flow', () => {
     it('should complete full message exchange flow', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Open chat
@@ -236,14 +239,16 @@ describe('Chat Flow Integration Tests', () => {
 
       // Verify agent message appears
       await waitFor(() => {
-        expect(screen.getByText('Hello! How can I help you today?')).toBeInTheDocument();
+        expect(
+          screen.getByText('Hello! How can I help you today?')
+        ).toBeInTheDocument();
       });
     });
 
     it('should handle message sending failure and retry', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       const onError = vi.fn();
-      
+
       render(<ChatWidget config={mockConfig} onError={onError} />);
 
       // Open and connect chat
@@ -288,7 +293,7 @@ describe('Chat Flow Integration Tests', () => {
   describe('Typing Indicator Flow', () => {
     it('should handle typing indicators between visitor and agent', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Open and connect chat
@@ -313,7 +318,9 @@ describe('Chat Flow Integration Tests', () => {
 
       // Should send typing indicator
       expect(mockWebSocket.send).toHaveBeenCalledWith(
-        expect.stringContaining('application/vnd.amazonaws.connect.event.typing')
+        expect.stringContaining(
+          'application/vnd.amazonaws.connect.event.typing'
+        )
       );
 
       // Simulate agent typing
@@ -354,7 +361,7 @@ describe('Chat Flow Integration Tests', () => {
   describe('Error Recovery Flow', () => {
     it('should handle connection loss and recovery', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Establish connection
@@ -449,16 +456,13 @@ describe('Chat Flow Integration Tests', () => {
     it('should integrate useChat, useConnect, and useWidget hooks correctly', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       const onStateChange = vi.fn();
-      
-      render(
-        <ChatWidget
-          config={mockConfig}
-          onStateChange={onStateChange}
-        />
-      );
+
+      render(<ChatWidget config={mockConfig} onStateChange={onStateChange} />);
 
       // Test widget state management
-      expect(screen.getByRole('button', { name: 'Open chat' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Open chat' })
+      ).toBeInTheDocument();
 
       // Open widget
       await user.click(screen.getByRole('button', { name: 'Open chat' }));
@@ -498,7 +502,7 @@ describe('Chat Flow Integration Tests', () => {
   describe('Session Management', () => {
     it('should handle session lifecycle correctly', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Start session
@@ -541,7 +545,7 @@ describe('Chat Flow Integration Tests', () => {
     it('should handle session timeout', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       const onError = vi.fn();
-      
+
       render(<ChatWidget config={mockConfig} onError={onError} />);
 
       // Start session
@@ -557,7 +561,9 @@ describe('Chat Flow Integration Tests', () => {
           call => call[0] === 'close'
         )?.[1];
         if (closeHandler) {
-          closeHandler(new CloseEvent('close', { code: 1000, reason: 'Session timeout' }));
+          closeHandler(
+            new CloseEvent('close', { code: 1000, reason: 'Session timeout' })
+          );
         }
       });
 
@@ -571,7 +577,7 @@ describe('Chat Flow Integration Tests', () => {
   describe('Offline/Online Handling', () => {
     it('should handle offline/online state changes', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-      
+
       render(<ChatWidget config={mockConfig} />);
 
       // Start chat
