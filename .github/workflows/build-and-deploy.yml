@@ -151,18 +151,20 @@ jobs:
         with:
           name: widget-bundle-${{ needs.build.outputs.version }}
           path: deploy/
-
+          
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+
+      - name: Debug AWS Identity
+        run: aws sts get-caller-identity
 
       - name: Deploy to S3 staging
         run: |
-          aws s3 sync deploy/ s3://${{ vars.STAGING_S3_BUCKET }}/widget/ \
+          aws s3 sync deploy/ s3://aws-connect-widget-development-391970746680-ap-southeast-2/widget/ \
             --delete \
             --cache-control "public, max-age=300" \
             --metadata version=${{ needs.build.outputs.version }}
@@ -170,7 +172,7 @@ jobs:
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ vars.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} \
+            --distribution-id E2ESKNF68HE8DU \
             --paths "/widget/*"
 
       - name: Update staging environment variables
@@ -184,9 +186,9 @@ jobs:
           sleep 30
           
           # Test widget loading
-          curl -f -s "https://${{ vars.STAGING_DOMAIN }}/widget/integration.js" > /dev/null
-          curl -f -s "https://${{ vars.STAGING_DOMAIN }}/widget/aws-connect-chat-widget.umd.js" > /dev/null
-          curl -f -s "https://${{ vars.STAGING_DOMAIN }}/widget/aws-connect-chat-widget.css" > /dev/null
+          curl -f -s "https://dssa9dawnkd0g.cloudfront.net/widget/integration.js" > /dev/null
+          curl -f -s "https://dssa9dawnkd0g.cloudfront.net/widget/aws-connect-chat-widget.umd.js" > /dev/null
+          curl -f -s "https://dssa9dawnkd0g.cloudfront.net/widget/aws-connect-chat-widget.css" > /dev/null
           
           echo "✅ Staging deployment successful"
 
@@ -208,7 +210,6 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
 
       - name: Deploy to S3 production
