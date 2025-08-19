@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Connect Chat Widget Integration Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button.secondary {
+            background: #6c757d;
+        }
+        .button.secondary:hover {
+            background: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AWS Connect Chat Widget Integration Example</h1>
+        
+        <div class="section">
+            <h2>1. Basic Integration</h2>
+            <p>Add this script tag to your HTML page:</p>
+            <div class="code-block">
+&lt;script src="https://cdn.example.com/integration.js"&gt;&lt;/script&gt;
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2. Custom Configuration</h2>
+            <p>Initialize with your AWS Connect settings:</p>
+            <div class="code-block">
+&lt;script&gt;
+// Configure before the widget loads
+window.AWSConnectChatWidgetAPI.init({
+  aws: {
+    region: 'us-east-1',
+    instanceId: 'your-instance-id',
+    contactFlowId: 'your-contact-flow-id',
+    apiGatewayEndpoint: 'your-api-gateway-endpoint'
+  },
+  ui: {
+    theme: {
+      primaryColor: '#007bff',
+      secondaryColor: '#6c757d'
+    },
+    position: {
+      bottom: '20px',
+      right: '20px'
+    },
+    messages: {
+      welcomeMessage: 'Hello! How can we help you today?'
+    }
+  }
+});
+&lt;/script&gt;
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. Manual Control</h2>
+            <p>Control the widget programmatically:</p>
+            <div class="code-block">
+// Update configuration
+AWSConnectChatWidgetAPI.updateConfig({
+  ui: { theme: { primaryColor: '#28a745' } }
+});
+
+// Get widget state
+const state = AWSConnectChatWidgetAPI.getState();
+
+// Destroy widget
+AWSConnectChatWidgetAPI.destroy();
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. Test Controls</h2>
+            <p>Use these buttons to test widget functionality and lifecycle management:</p>
+            <button class="button" onclick="testUpdateTheme()">Update Theme</button>
+            <button class="button" onclick="testGetState()">Get State</button>
+            <button class="button" onclick="testIsActive()">Check Active</button>
+            <button class="button secondary" onclick="testDestroy()">Destroy Widget</button>
+            <button class="button" onclick="testReinitialize()">Reinitialize</button>
+            <button class="button" onclick="testMemoryUsage()">Check Memory</button>
+        </div>
+
+        <div class="section">
+            <h2>5. Content Example</h2>
+            <p>This is sample content to demonstrate how the chat widget appears alongside your website content. The widget should appear as a floating button in the bottom-right corner of the page.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        </div>
+    </div>
+
+    <!-- Widget Integration Script -->
+    <script>
+        // Test functions for demonstration
+        function testUpdateTheme() {
+            if (window.AWSConnectChatWidgetAPI) {
+                window.AWSConnectChatWidgetAPI.updateConfig({
+                    ui: {
+                        theme: {
+                            primaryColor: '#28a745'
+                        }
+                    }
+                });
+                alert('Theme updated to green!');
+            } else {
+                alert('Widget API not available');
+            }
+        }
+
+        function testGetState() {
+            if (window.AWSConnectChatWidgetAPI) {
+                const state = window.AWSConnectChatWidgetAPI.getState();
+                alert('Widget State: ' + JSON.stringify(state, null, 2));
+            } else {
+                alert('Widget API not available');
+            }
+        }
+
+        function testDestroy() {
+            if (window.AWSConnectChatWidgetAPI) {
+                window.AWSConnectChatWidgetAPI.destroy();
+                alert('Widget destroyed!');
+            } else {
+                alert('Widget API not available');
+            }
+        }
+
+        function testReinitialize() {
+            if (window.AWSConnectChatWidgetAPI) {
+                window.AWSConnectChatWidgetAPI.reinit({
+                    aws: {
+                        region: 'us-east-1',
+                        instanceId: 'demo-instance',
+                        contactFlowId: 'demo-flow',
+                        apiGatewayEndpoint: 'https://api.example.com'
+                    },
+                    ui: {
+                        theme: {
+                            primaryColor: '#dc3545'
+                        }
+                    }
+                });
+                alert('Widget reinitialized with red theme!');
+            } else {
+                alert('Widget API not available');
+            }
+        }
+
+        function testIsActive() {
+            if (window.AWSConnectChatWidgetAPI) {
+                const isActive = window.AWSConnectChatWidgetAPI.isActive();
+                alert('Widget is ' + (isActive ? 'active' : 'inactive'));
+            } else {
+                alert('Widget API not available');
+            }
+        }
+
+        function testMemoryUsage() {
+            if (window.performance && window.performance.memory) {
+                const memory = window.performance.memory;
+                const memoryInfo = `
+Memory Usage:
+- Used: ${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB
+- Total: ${(memory.totalJSHeapSize / 1024 / 1024).toFixed(2)} MB
+- Limit: ${(memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB
+                `.trim();
+                alert(memoryInfo);
+            } else {
+                alert('Memory information not available in this browser');
+            }
+        }
+
+        // Initialize widget with demo configuration
+        // Note: This would normally be loaded from the integration.js script
+        console.log('Demo page loaded. In a real implementation, the widget would be loaded from the integration script.');
+    </script>
+</body>
+</html>

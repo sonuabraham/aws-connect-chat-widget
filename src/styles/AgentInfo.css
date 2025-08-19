@@ -1,0 +1,270 @@
+/* AgentInfo component styles */
+/* Requirements: 4.1, 4.2, 4.3 */
+
+.agent-info {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.agent-info--compact {
+  padding: 4px 0;
+}
+
+.agent-info__content,
+.agent-info__placeholder {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.agent-info--compact .agent-info__content,
+.agent-info--compact .agent-info__placeholder {
+  gap: 8px;
+}
+
+/* Avatar container with status indicator */
+.agent-info__avatar-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.agent-info__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.agent-info--compact .agent-info__avatar {
+  width: 32px;
+  height: 32px;
+}
+
+.agent-info__avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.agent-info__avatar--placeholder {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  animation: agent-info-pulse 2s infinite ease-in-out;
+}
+
+/* Status indicator */
+.agent-info__status-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  transition: background-color 0.3s ease;
+}
+
+.agent-info--compact .agent-info__status-indicator {
+  width: 10px;
+  height: 10px;
+  bottom: 1px;
+  right: 1px;
+  border-width: 1.5px;
+}
+
+/* Agent details */
+.agent-info__details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agent-info__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-info--compact .agent-info__name {
+  font-size: 13px;
+}
+
+.agent-info__status {
+  display: flex;
+  align-items: center;
+  min-height: 16px;
+}
+
+.agent-info__status-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1;
+}
+
+.agent-info--compact .agent-info__status-text {
+  font-size: 11px;
+}
+
+/* Typing indicator */
+.agent-info__typing {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: agent-info-typing-fade-in 0.3s ease-in-out;
+}
+
+.agent-info__typing-dots {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.agent-info__typing-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.8);
+  animation: agent-info-typing-bounce 1.4s infinite ease-in-out;
+}
+
+.agent-info__typing-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.agent-info__typing-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.agent-info__typing-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-style: italic;
+  line-height: 1;
+}
+
+.agent-info--compact .agent-info__typing-text {
+  font-size: 11px;
+}
+
+/* Animations */
+@keyframes agent-info-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes agent-info-typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes agent-info-typing-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .agent-info__avatar {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .agent-info--compact .agent-info__avatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .agent-info__name {
+    font-size: 15px;
+  }
+  
+  .agent-info--compact .agent-info__name {
+    font-size: 14px;
+  }
+  
+  .agent-info__status-text,
+  .agent-info__typing-text {
+    font-size: 13px;
+  }
+  
+  .agent-info--compact .agent-info__status-text,
+  .agent-info--compact .agent-info__typing-text {
+    font-size: 12px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .agent-info__avatar {
+    border: 3px solid white;
+  }
+  
+  .agent-info__status-indicator {
+    border: 3px solid white;
+  }
+  
+  .agent-info__name {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .agent-info__avatar--placeholder,
+  .agent-info__typing-dot,
+  .agent-info__typing {
+    animation: none;
+  }
+  
+  .agent-info__status-indicator {
+    transition: none;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .agent-info__avatar--fallback {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .agent-info__avatar--placeholder {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* Focus styles for accessibility */
+.agent-info:focus-within {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

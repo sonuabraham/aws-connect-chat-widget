@@ -1,0 +1,246 @@
+/* MessageInput component styles */
+/* Requirements: 3.1, 3.4, 5.2, 5.3 */
+
+.message-input {
+  width: 100%;
+}
+
+.message-input__container {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: border-color 0.2s ease;
+}
+
+.message-input__container:focus-within {
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.message-input__field {
+  flex: 1;
+  position: relative;
+}
+
+.message-input__textarea {
+  width: 100%;
+  min-height: 20px;
+  max-height: 120px;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+  background: transparent;
+  padding: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.message-input__textarea::placeholder {
+  color: #6c757d;
+  opacity: 1;
+}
+
+.message-input__textarea:disabled {
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.message-input__textarea::-webkit-scrollbar {
+  width: 4px;
+}
+
+.message-input__textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.message-input__textarea::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.message-input__char-count {
+  position: absolute;
+  bottom: -20px;
+  right: 0;
+  font-size: 11px;
+  color: #6c757d;
+  transition: color 0.2s ease;
+}
+
+.message-input__char-count--limit {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.message-input__send-button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #e9ecef;
+  color: #6c757d;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.message-input__send-button:hover:not(:disabled) {
+  background: #dee2e6;
+  transform: scale(1.05);
+}
+
+.message-input__send-button:focus-visible {
+  outline: 2px solid var(--primary-color, #007bff);
+  outline-offset: 2px;
+}
+
+.message-input__send-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.message-input__send-button--active {
+  background: var(--primary-color, #007bff);
+  color: white;
+}
+
+.message-input__send-button--active:hover {
+  background: var(--secondary-color, #0056b3);
+}
+
+.message-input__send-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.message-input__send-icon {
+  transition: transform 0.2s ease;
+}
+
+.message-input__send-button--active .message-input__send-icon {
+  transform: translateX(1px);
+}
+
+.message-input__hint {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #6c757d;
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .message-input__container {
+    padding: 10px;
+  }
+  
+  .message-input__textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .message-input__send-button {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .message-input__hint {
+    display: none; /* Hide hint on mobile to save space */
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .message-input__container {
+    border: 2px solid currentColor;
+  }
+  
+  .message-input__send-button {
+    border: 1px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .message-input__container,
+  .message-input__send-button,
+  .message-input__send-icon,
+  .message-input__char-count {
+    transition: none;
+  }
+  
+  .message-input__send-button:hover,
+  .message-input__send-button:active {
+    transform: none;
+  }
+}
+
+/* Focus styles for better accessibility */
+.message-input__textarea:focus {
+  outline: none; /* Handled by container focus-within */
+}
+
+/* Animation for send button activation */
+@keyframes send-button-activate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.message-input__send-button--active {
+  animation: send-button-activate 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-input__send-button--active {
+    animation: none;
+  }
+}
+
+/* Disabled state styles */
+.message-input__container:has(.message-input__textarea:disabled) {
+  opacity: 0.6;
+  background: #f8f9fa;
+}
+
+/* Loading state for send button */
+.message-input__send-button--loading {
+  pointer-events: none;
+}
+
+.message-input__send-button--loading .message-input__send-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-input__send-button--loading .message-input__send-icon {
+    animation: none;
+  }
+}

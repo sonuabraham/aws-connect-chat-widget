@@ -1,0 +1,348 @@
+/* MessageList component styles */
+/* Requirements: 3.2, 3.3, 3.4, 4.2 */
+
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  background: #f8f9fa;
+  scroll-behavior: smooth;
+}
+
+.message-list__content {
+  padding: 16px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Empty state */
+.message-list__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  color: #6c757d;
+  padding: 40px 20px;
+}
+
+.message-list__empty-icon {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.message-list__empty-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Message groups */
+.message-list__group {
+  margin-bottom: 16px;
+}
+
+.message-list__group:last-child {
+  margin-bottom: 0;
+}
+
+/* Date headers */
+.message-list__date-header {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 16px;
+}
+
+.message-list__date-text {
+  background: rgba(0, 0, 0, 0.05);
+  color: #6c757d;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Message bubbles */
+.message-bubble {
+  display: flex;
+  margin-bottom: 8px;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.message-bubble--own {
+  flex-direction: row-reverse;
+}
+
+.message-bubble--other {
+  flex-direction: row;
+}
+
+.message-bubble__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.message-bubble__content {
+  max-width: 70%;
+  min-width: 0;
+}
+
+.message-bubble--own .message-bubble__content {
+  align-items: flex-end;
+}
+
+.message-bubble--other .message-bubble__content {
+  align-items: flex-start;
+}
+
+.message-bubble__sender {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 4px;
+  padding: 0 12px;
+}
+
+.message-bubble__text {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.message-bubble--own .message-bubble__text {
+  background: var(--primary-color, #007bff);
+  color: white;
+  border-radius: 18px 18px 4px 18px;
+}
+
+.message-bubble--other .message-bubble__text {
+  background: white;
+  color: #333;
+  border-radius: 18px 18px 18px 4px;
+}
+
+.message-bubble__meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 0 12px;
+}
+
+.message-bubble--other .message-bubble__meta {
+  justify-content: flex-start;
+}
+
+.message-bubble__time {
+  font-size: 11px;
+  color: #6c757d;
+  opacity: 0.8;
+}
+
+.message-bubble__status-icon {
+  color: #6c757d;
+  opacity: 0.7;
+}
+
+.message-bubble__status-icon--error {
+  color: #dc3545;
+  opacity: 1;
+}
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 8px;
+  animation: typing-indicator-fade-in 0.3s ease-in-out;
+}
+
+.typing-indicator__content {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 18px 18px 18px 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.typing-indicator__dots {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.typing-indicator__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #6c757d;
+  animation: typing-dot-bounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator__dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator__dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.typing-indicator__text {
+  font-size: 12px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+@keyframes typing-dot-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes typing-indicator-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scroll to bottom button */
+.message-list__scroll-button {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: var(--primary-color, #007bff);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.message-list__scroll-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.message-list__scroll-button:focus-visible {
+  outline: 2px solid var(--primary-color, #007bff);
+  outline-offset: 2px;
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .message-list__content {
+    padding: 12px;
+  }
+  
+  .message-bubble__content {
+    max-width: 85%;
+  }
+  
+  .message-bubble__text {
+    padding: 10px 14px;
+    font-size: 16px; /* Larger text for mobile */
+  }
+  
+  .message-bubble__avatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .message-list__scroll-button {
+    bottom: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .message-bubble__text {
+    border: 2px solid currentColor;
+  }
+  
+  .message-list__date-text {
+    border: 1px solid currentColor;
+  }
+  
+  .typing-indicator__content {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .message-list {
+    scroll-behavior: auto;
+  }
+  
+  .typing-indicator__dot,
+  .typing-indicator,
+  .message-list__scroll-button {
+    animation: none;
+    transition: none;
+  }
+  
+  .message-list__scroll-button:hover {
+    transform: none;
+  }
+}
+
+/* Custom scrollbar */
+.message-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.message-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.message-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.message-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Firefox scrollbar */
+.message-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}

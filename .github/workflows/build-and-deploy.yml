@@ -1,0 +1,358 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm run test:coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate version
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+            TAG=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(date +%Y%m%d)-${GITHUB_SHA::8}
+            TAG=latest
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Tag: $TAG"
+
+      - name: Update package version
+        run: |
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
+      - name: Build application
+        run: npm run build
+
+      - name: Build library
+        run: npm run build:lib
+
+      - name: Build widget bundle
+        run: npm run build:widget
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy
+          cp -r dist/widget/* deploy/
+          
+          # Create version info
+          cat > deploy/version.json << EOF
+          {
+            "version": "${{ steps.version.outputs.version }}",
+            "tag": "${{ steps.version.outputs.tag }}",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "buildDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "buildNumber": "${{ github.run_number }}"
+          }
+          EOF
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: widget-bundle-${{ steps.version.outputs.version }}
+          path: deploy/
+          retention-days: 30
+
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ steps.version.outputs.version }}
+          path: dist/
+          retention-days: 7
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: widget-bundle-${{ needs.build.outputs.version }}
+          path: deploy/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Deploy to S3 staging
+        run: |
+          aws s3 sync deploy/ s3://${{ vars.STAGING_S3_BUCKET }}/widget/ \
+            --delete \
+            --cache-control "public, max-age=300" \
+            --metadata version=${{ needs.build.outputs.version }}
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/widget/*"
+
+      - name: Update staging environment variables
+        run: |
+          echo "WIDGET_VERSION=${{ needs.build.outputs.version }}" >> $GITHUB_ENV
+          echo "STAGING_URL=https://${{ vars.STAGING_DOMAIN }}/widget/" >> $GITHUB_ENV
+
+      - name: Run smoke tests
+        run: |
+          # Wait for deployment to propagate
+          sleep 30
+          
+          # Test widget loading
+          curl -f -s "https://${{ vars.STAGING_DOMAIN }}/widget/integration.js" > /dev/null
+          curl -f -s "https://${{ vars.STAGING_DOMAIN }}/widget/aws-connect-chat-widget.umd.js" > /dev/null
+          curl -f -s "https://${{ vars.STAGING_DOMAIN }}/widget/aws-connect-chat-widget.css" > /dev/null
+          
+          echo "✅ Staging deployment successful"
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: production
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: widget-bundle-${{ needs.build.outputs.version }}
+          path: deploy/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Deploy to S3 production
+        run: |
+          # Deploy versioned files
+          aws s3 sync deploy/ s3://${{ vars.PRODUCTION_S3_BUCKET }}/widget/v${{ needs.build.outputs.version }}/ \
+            --cache-control "public, max-age=31536000, immutable" \
+            --metadata version=${{ needs.build.outputs.version }}
+          
+          # Deploy latest files
+          aws s3 sync deploy/ s3://${{ vars.PRODUCTION_S3_BUCKET }}/widget/latest/ \
+            --delete \
+            --cache-control "public, max-age=3600" \
+            --metadata version=${{ needs.build.outputs.version }}
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.PRODUCTION_CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/widget/latest/*"
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.build.outputs.tag }}
+          release_name: Release ${{ needs.build.outputs.version }}
+          body: |
+            ## Changes in this Release
+            
+            ### Widget Bundle
+            - Version: ${{ needs.build.outputs.version }}
+            - Build: ${{ github.run_number }}
+            - Commit: ${{ github.sha }}
+            
+            ### CDN URLs
+            - Integration Script: https://${{ vars.PRODUCTION_DOMAIN }}/widget/latest/integration.js
+            - Widget Bundle: https://${{ vars.PRODUCTION_DOMAIN }}/widget/latest/aws-connect-chat-widget.umd.js
+            - Widget Styles: https://${{ vars.PRODUCTION_DOMAIN }}/widget/latest/aws-connect-chat-widget.css
+            
+            ### Versioned URLs (Immutable)
+            - Integration Script: https://${{ vars.PRODUCTION_DOMAIN }}/widget/v${{ needs.build.outputs.version }}/integration.js
+            - Widget Bundle: https://${{ vars.PRODUCTION_DOMAIN }}/widget/v${{ needs.build.outputs.version }}/aws-connect-chat-widget.umd.js
+            - Widget Styles: https://${{ vars.PRODUCTION_DOMAIN }}/widget/v${{ needs.build.outputs.version }}/aws-connect-chat-widget.css
+            
+            ### Installation
+            ```html
+            <script src="https://${{ vars.PRODUCTION_DOMAIN }}/widget/latest/integration.js"></script>
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: deploy/
+          asset_name: aws-connect-chat-widget-${{ needs.build.outputs.version }}.zip
+          asset_content_type: application/zip
+
+      - name: Run production smoke tests
+        run: |
+          # Wait for deployment to propagate
+          sleep 60
+          
+          # Test latest URLs
+          curl -f -s "https://${{ vars.PRODUCTION_DOMAIN }}/widget/latest/integration.js" > /dev/null
+          curl -f -s "https://${{ vars.PRODUCTION_DOMAIN }}/widget/latest/aws-connect-chat-widget.umd.js" > /dev/null
+          curl -f -s "https://${{ vars.PRODUCTION_DOMAIN }}/widget/latest/aws-connect-chat-widget.css" > /dev/null
+          
+          # Test versioned URLs
+          curl -f -s "https://${{ vars.PRODUCTION_DOMAIN }}/widget/v${{ needs.build.outputs.version }}/integration.js" > /dev/null
+          curl -f -s "https://${{ vars.PRODUCTION_DOMAIN }}/widget/v${{ needs.build.outputs.version }}/aws-connect-chat-widget.umd.js" > /dev/null
+          curl -f -s "https://${{ vars.PRODUCTION_DOMAIN }}/widget/v${{ needs.build.outputs.version }}/aws-connect-chat-widget.css" > /dev/null
+          
+          echo "✅ Production deployment successful"
+
+      - name: Notify deployment
+        run: |
+          echo "🚀 Production deployment completed successfully!"
+          echo "Version: ${{ needs.build.outputs.version }}"
+          echo "CDN: https://${{ vars.PRODUCTION_DOMAIN }}/widget/latest/"
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  performance-test:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    needs: [build, deploy-staging]
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.12.x
+
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun --upload.target=temporary-public-storage
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          LHCI_SERVER_BASE_URL: https://${{ vars.STAGING_DOMAIN }}
+
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    steps:
+      - name: Notify Slack on success
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: |
+            🚀 AWS Connect Chat Widget deployment successful!
+            Version: ${{ needs.build.outputs.version }}
+            Environment: ${{ github.ref == 'refs/heads/develop' && 'Staging' || 'Production' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: |
+            ❌ AWS Connect Chat Widget deployment failed!
+            Version: ${{ needs.build.outputs.version }}
+            Environment: ${{ github.ref == 'refs/heads/develop' && 'Staging' || 'Production' }}
+            Please check the GitHub Actions logs.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
