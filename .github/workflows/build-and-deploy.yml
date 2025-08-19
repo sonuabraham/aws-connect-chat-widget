@@ -74,7 +74,10 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/v}
             TAG=${GITHUB_REF#refs/tags/}
           else
-            VERSION=$(date +%Y%m%d)-${GITHUB_SHA::8}
+            # Generate a valid semantic version for development builds
+            BASE_VERSION="0.0.0"
+            BUILD_NUMBER="${GITHUB_RUN_NUMBER:-1}"
+            VERSION="${BASE_VERSION}-dev.${BUILD_NUMBER}.${GITHUB_SHA::8}"
             TAG=latest
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
