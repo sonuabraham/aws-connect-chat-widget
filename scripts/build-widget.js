@@ -31,12 +31,12 @@ try {
     fs.mkdirSync(WIDGET_DIR, { recursive: true });
     console.log(`📁 Widget directory created: ${WIDGET_DIR}`);
 
-    // Copy standalone widget file (working version)
-    console.log('📋 Copying standalone widget...');
-    const standaloneSrc = path.join(__dirname, '../src/widget-standalone.js');
+    // Copy AWS Connect integrated widget file
+    console.log('📋 Copying AWS Connect integrated widget...');
+    const standaloneSrc = path.join(__dirname, '../src/widget-aws-connect.js');
     const standaloneDest = path.join(WIDGET_DIR, 'aws-connect-chat-widget.umd.js');
     fs.copyFileSync(standaloneSrc, standaloneDest);
-    console.log('  ✓ aws-connect-chat-widget.umd.js (standalone)');
+    console.log('  ✓ aws-connect-chat-widget.umd.js (AWS Connect integrated)');
 
     // Copy CSS from Vite build
     const cssSrc = path.join(DIST_DIR, 'aws-connect-chat-widget.css');
