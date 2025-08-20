@@ -31,26 +31,20 @@ try {
     fs.mkdirSync(WIDGET_DIR, { recursive: true });
     console.log(`📁 Widget directory created: ${WIDGET_DIR}`);
 
-    // Copy built files to widget directory
-    console.log('📋 Copying built files...');
-    console.log(`📁 Source directory: ${DIST_DIR}`);
-    console.log(`📁 Target directory: ${WIDGET_DIR}`);
-    console.log(`📁 Widget directory exists: ${fs.existsSync(WIDGET_DIR)}`);
-    const distFiles = fs.readdirSync(DIST_DIR);
-    console.log(`📁 Files in dist: ${distFiles.join(', ')}`);
+    // Copy standalone widget file (working version)
+    console.log('📋 Copying standalone widget...');
+    const standaloneSrc = path.join(__dirname, '../src/widget-standalone.js');
+    const standaloneDest = path.join(WIDGET_DIR, 'aws-connect-chat-widget.umd.js');
+    fs.copyFileSync(standaloneSrc, standaloneDest);
+    console.log('  ✓ aws-connect-chat-widget.umd.js (standalone)');
 
-    distFiles.forEach(file => {
-        if (file.startsWith('aws-connect-chat-widget.') && !fs.statSync(path.join(DIST_DIR, file)).isDirectory()) {
-            const srcPath = path.join(DIST_DIR, file);
-            const destPath = path.join(WIDGET_DIR, file);
-            try {
-                fs.copyFileSync(srcPath, destPath);
-                console.log(`  ✓ ${file}`);
-            } catch (error) {
-                console.error(`  ❌ Failed to copy ${file}:`, error.message);
-            }
-        }
-    });
+    // Copy CSS from Vite build
+    const cssSrc = path.join(DIST_DIR, 'aws-connect-chat-widget.css');
+    const cssDest = path.join(WIDGET_DIR, 'aws-connect-chat-widget.css');
+    if (fs.existsSync(cssSrc)) {
+        fs.copyFileSync(cssSrc, cssDest);
+        console.log('  ✓ aws-connect-chat-widget.css');
+    }
 
     // Copy integration script
     const integrationSrc = path.join(__dirname, '../public/integration.js');
@@ -169,6 +163,9 @@ For issues and questions, please contact support.
         const sizeKB = (stats.size / 1024).toFixed(1);
         console.log(`  ${file}: ${sizeKB} KB`);
     });
+
+    // Using standalone widget - no UMD fix needed
+    console.log('\n✅ Using standalone widget implementation');
 
     console.log('\n✅ Widget build completed successfully!');
     console.log(`📁 Output directory: ${WIDGET_DIR}`);

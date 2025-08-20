@@ -532,13 +532,19 @@ declare global {
   }
 }
 
-// Export for global access
+// Create the widget API object
+const AWSConnectChatWidget = {
+  init: initializeWidget,
+  version: '1.0.0',
+};
+
+// Assign to window for browser environments
 if (typeof window !== 'undefined') {
-  window.AWSConnectChatWidget = {
-    init: initializeWidget,
-    version: '1.0.0',
-  };
+  (window as any).AWSConnectChatWidget = AWSConnectChatWidget;
 }
 
+// Export for UMD - use named exports that match the object structure
+export const init = initializeWidget;
+export const version = '1.0.0';
 export { ChatWidget, ThemeProvider };
 export type { SimpleWidgetConfig as WidgetConfig };

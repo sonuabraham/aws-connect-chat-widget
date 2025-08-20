@@ -25,6 +25,9 @@ export default defineConfig(({ mode }) => {
               'react-dom': 'ReactDOM',
             },
             assetFileNames: 'aws-connect-chat-widget.[ext]',
+            // Use named exports to avoid the .default issue
+            exports: 'named',
+            extend: true,
           },
         },
         minify: 'terser',
