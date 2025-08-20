@@ -164,7 +164,7 @@ jobs:
 
       - name: Deploy to S3 staging
         run: |
-          aws s3 sync deploy/ s3://aws-connect-widget-development-391970746680-ap-southeast-2/widget/ \
+          aws s3 sync deploy/ s3://${{ vars.STAGING_S3_BUCKET }}/widget/ \
             --delete \
             --cache-control "public, max-age=300" \
             --metadata version=${{ needs.build.outputs.version }}
@@ -172,7 +172,7 @@ jobs:
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id E2ESKNF68HE8DU \
+            --distribution-id ${{ vars.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/widget/*"
 
       - name: Update staging environment variables
@@ -186,9 +186,9 @@ jobs:
           sleep 30
           
           # Test widget loading
-          curl -f -s "https://dssa9dawnkd0g.cloudfront.net/widget/integration.js" > /dev/null
-          curl -f -s "https://dssa9dawnkd0g.cloudfront.net/widget/aws-connect-chat-widget.umd.js" > /dev/null
-          curl -f -s "https://dssa9dawnkd0g.cloudfront.net/widget/aws-connect-chat-widget.css" > /dev/null
+          curl -f -s "https://${{ vars.STAGING_DOMAIN }}/widget/integration.js" > /dev/null
+          curl -f -s "https://${{ vars.STAGING_DOMAIN }}/widget/aws-connect-chat-widget.umd.js" > /dev/null
+          curl -f -s "https://${{ vars.STAGING_DOMAIN }}/widget/aws-connect-chat-widget.css" > /dev/null
           
           echo "✅ Staging deployment successful"
 
